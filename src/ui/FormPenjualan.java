@@ -4,11 +4,13 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import java.util.ArrayList;
 import dao.BarangDAO;
 import dao.CustomerDAO;
 import model.Barang;
 import model.DetailPenjualan;
 import model.Penjualan;
+import view.CetakNota;
 
 public class FormPenjualan extends JFrame {
     // Komponen
@@ -20,9 +22,10 @@ public class FormPenjualan extends JFrame {
     // Atribut Metode Pembayaran
     private String metodeTerpilih = "";
 
-    private JTextField txtCustomer, txtHarga, txtQty, txtNoTelp, txtMetodePembayaran; //Tempat kasir ngetik sesuatu (Nama Customer, Jumlah Beli).
+    private JTextField txtCustomer, txtHarga, txtQty, txtNoTelp; //Tempat kasir ngetik sesuatu (Nama Customer, Jumlah Beli).
     private JTextField txtStokTersedia; //untuk qty yang tersedia setiap barang
     private JComboBox<String> cbBarang; //Tempat milih barang. Biar kasir nggak capek ngetik "Raket Yonex Tipe A-123" berulang kali.
+    private JTextField txtAdmin; //Nama admin
     private JTable tabelKeranjang; //Struk sementara. Tempat nampung semua barang yang mau dibeli sebelum akhirnya dicetak.
     private DefaultTableModel modelTabel; //Ini yang bertugas nambahin baris baru ke tabel saat klik tombol "Tambah".
     private JLabel labelTotal; //Cuma label penanda, biar kasir tahu kotak ini buat isi apa (misal: tulisan "Nama:").
@@ -37,12 +40,16 @@ public class FormPenjualan extends JFrame {
         setLayout(new BorderLayout(10, 10));
 
         // PANEL ATAS BAGIAN INPUT DATA
-        JPanel panelAtas = new JPanel(new GridLayout(6, 2, 10, 10));
+        JPanel panelAtas = new JPanel(new GridLayout(7, 2, 10, 10));
         panelAtas.setBorder(BorderFactory.createTitledBorder("Input Transaksi"));
 
         panelAtas.add(new JLabel("Nama Customer : "));
         txtCustomer = new JTextField();
         panelAtas.add(txtCustomer);
+
+        panelAtas.add(new JLabel("Nama Kasir : "));
+        txtAdmin = new JTextField();
+        panelAtas.add(txtAdmin);
 
         panelAtas.add(new JLabel("Pilih Barang : "));
         cbBarang = new JComboBox<>();
@@ -95,9 +102,6 @@ public class FormPenjualan extends JFrame {
         labelTotal = new JLabel("TOTAL : Rp 0");
         labelTotal.setFont(new Font("Arial", Font.BOLD, 18));
         
-
-
-        panelBawah.add(labelTotal);
         add(panelBawah, BorderLayout.SOUTH);
 
         loadBarangKeCombo();
@@ -145,12 +149,13 @@ public class FormPenjualan extends JFrame {
     private void loadBarangKeCombo() {
         cbBarang.removeAllItems(); // Bersihkan dulu biar gak double
         cbBarang.addItem("-- Pilih Barang --");
-        List<Barang> list = bDAO.getAll();
+        List<Barang> list = bDAO.getAllAktif();
         for (Barang b : list) {
             // Harus format "ID - Nama" supaya split-nya ketemu ID-nya
             cbBarang.addItem(b.getIdBarang() + " - " + b.getNamaBarang());
         }
     }
+
 
     private void updateHarga() {
         String pilihan = (String) cbBarang.getSelectedItem();
@@ -175,19 +180,23 @@ public class FormPenjualan extends JFrame {
             String pilihan = cbBarang.getSelectedItem().toString();
             String id = pilihan.split(" - ")[0]; // Ambil ID dari teks combo
             int qty = Integer.parseInt(txtQty.getText());
+            String noTelp = txtNoTelp.getText();
+            String namaAdmin = txtAdmin.getText();
 
             Barang b = bDAO.getById(id);
             if (b != null) {
-                DetailPenjualan detail = new DetailPenjualan(0, "TEMP", b, qty);
+                DetailPenjualan detail = new DetailPenjualan(0, 0, b, qty);
 
-                // Masukkan 6 data sesuai array 'kolom' lo
+                // Masukkan 6 data sesuai array 'kolom'
                 modelTabel.addRow(new Object[]{
                     b.getIdBarang(),    // Kolom 0 (ID - Tersembunyi)
                     b.getNamaBarang(),  // Kolom 1
                     b.getHargaJual(),    // Kolom 2
                     qty,                // Kolom 3
                     b.getDiskon() + "%",// Kolom 4
-                    detail.getSubtotal()// Kolom 5
+                    detail.getSubtotal(),// Kolom 5
+                    noTelp,
+                    namaAdmin
                 });
 
                 totalBelanja += detail.getSubtotal();
@@ -264,10 +273,14 @@ public class FormPenjualan extends JFrame {
             JOptionPane.showMessageDialog(this, "Keranjang belanja masih kosong!");
             return;
         }
+        if (txtCustomer.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nama Kasir Belum diisi!");
+        }
 
         try {
             // --- STEP 1: URUS CUSTOMER DULU ---
             String namaInput = txtCustomer.getText();
+    
             
             // Kita cari di database, ada gak customer dengan nama ini?
             model.Customer cust = cDAO.getByName(namaInput); 
@@ -289,25 +302,39 @@ public class FormPenjualan extends JFrame {
                 cust.setIdCustomer(idBaru);
             }
 
+            
+
             // --- STEP 2: SIMPAN HEADER (Ke Tabel penjualan) ---
             Penjualan p = new Penjualan();
             p.setNoNota("NOT-" + System.currentTimeMillis());
             p.setTanggal(new java.sql.Date(System.currentTimeMillis())); // Pakai sql date biar aman ke DB
             p.setCustomer(cust); // Pakai objek cust hasil pencarian/pembuatan di atas
             p.setTotalBayar(totalBelanja);
-            p.setNamaKasir("Admin"); 
+            p.setNamaKasir(txtAdmin.getText()); 
             p.setMetodePembayaran(metodeTerpilih);
             p.setDiskon(0);
+            
 
-            pDAO.insert(p); 
+            int idPenjualanBaru = pDAO.InsertAndGetId(p);
+
+            if(idPenjualanBaru == 0) {
+                JOptionPane.showMessageDialog(this, "Gagal simpan header penjualan!");
+                return;
+            }
+
 
             // --- STEP 3: SIMPAN DETAIL ---
+            List<DetailPenjualan> listUntukNota = new ArrayList<>();
+
             for (int i = 0; i < modelTabel.getRowCount(); i++) {
                 DetailPenjualan dp = new DetailPenjualan();
-                dp.setnoNota(p.getNoNota()); 
+                dp.setIdPenjualan(idPenjualanBaru); 
                 
                 Barang b = new Barang();
                 b.setIdBarang(modelTabel.getValueAt(i, 0).toString());
+                b.setNamaBarang(modelTabel.getValueAt(i, 1).toString());
+                b.setHargaJual(Double.parseDouble(modelTabel.getValueAt(i, 2).toString()));
+                
                 dp.setBarang(b);
                 
                 int qty = Integer.parseInt(modelTabel.getValueAt(i, 3).toString());
@@ -318,10 +345,14 @@ public class FormPenjualan extends JFrame {
 
                 dpDAO.insert(dp); 
                 bDAO.kurangiStok(b.getIdBarang(), qty);
+
+                listUntukNota.add(dp);
             }
 
             // --- STEP 4: FINISHING ---
             JOptionPane.showMessageDialog(this, "Transaksi Berhasil Disimpan!");
+            view.CetakNota nota = new view.CetakNota(this, true, p, listUntukNota);
+            nota.setVisible(true);
             
             // Reset form
             modelTabel.setRowCount(0);
@@ -331,6 +362,7 @@ public class FormPenjualan extends JFrame {
             labelTotal.setText("TOTAL : Rp 0");
             totalBelanja = 0;
             cbBarang.setSelectedIndex(0);
+        
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Gagal Simpan: " + ex.getMessage());

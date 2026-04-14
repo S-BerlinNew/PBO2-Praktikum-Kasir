@@ -1,6 +1,6 @@
 package dao;
 
-import config.Koneksi;
+import config.KoneksiDatabase;
 import model.Customer;
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class CustomerDAO {
         List<Customer> list = new ArrayList<>();
         String sql = "SELECT * FROM customer";
 
-        try (Connection conn = Koneksi.getConnection();
+        try (Connection conn = KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery()) {
 
@@ -35,7 +35,7 @@ public class CustomerDAO {
     // Insert ke database
     public void insert(Customer c) {
         String sql = "INSERT INTO customer (kode_customer, nama_customer, no_telp) VALUES (?, ?, ?)";
-        try(Connection conn = Koneksi.getConnection();
+        try(Connection conn = KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, c.getKodeCustomer());
                 ps.setString(2, c.getNamaCustomer());
@@ -54,7 +54,7 @@ public class CustomerDAO {
     public Customer getByName(String nama) {
         Customer cust = null;
         String sql = "SELECT * FROM customer WHERE nama_customer = ?";
-        try (Connection conn = Koneksi.getConnection();
+        try (Connection conn = KoneksiDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, nama);
@@ -77,7 +77,7 @@ public class CustomerDAO {
     // 2. Method untuk simpan customer baru & ambil ID-nya (Biar gak error insertAndGetId)
     public int insertAndGetId(model.Customer c) {
     String sql = "INSERT INTO customer (kode_customer, nama_customer, no_telp) VALUES (?, ?, ?)";
-        try (Connection conn = config.Koneksi.getConnection();
+        try (Connection conn = config.KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             
             ps.setString(1, c.getKodeCustomer());

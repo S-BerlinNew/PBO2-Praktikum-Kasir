@@ -3,6 +3,7 @@ package model;
 import java.sql.Date;
 
 public class Penjualan {
+    private int idPenjualan;
     private String noNota;
     private Date tanggal;
     private Customer customer;
@@ -14,9 +15,10 @@ public class Penjualan {
 
     public Penjualan() { }
     // konstruktor
-    public Penjualan(String noNota, Date tanggal, Customer customer, String namaKasir, 
+    public Penjualan(int idPenjualan, String noNota, Date tanggal, Customer customer, String namaKasir, 
     String metodePembayaran, DetailPenjualan detailPenjualan) 
     {
+        this.idPenjualan = idPenjualan;
         this.noNota = noNota;
         this.tanggal = tanggal;
         this.customer = customer;
@@ -26,6 +28,10 @@ public class Penjualan {
     }
 
     // getter
+    public int getIdPenjualan() {
+        return idPenjualan;
+    }
+
     public String getNoNota() {
         return noNota;
     }
@@ -54,7 +60,12 @@ public class Penjualan {
         return totalBayar;
     }
 
+
     // Setter
+    public void setIdPenjualan(int idPenjualan) {
+        this.idPenjualan = idPenjualan;
+    }
+
     public void setNoNota(String noNota) {
         this.noNota = noNota;
     }

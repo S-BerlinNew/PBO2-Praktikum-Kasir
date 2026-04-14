@@ -10,11 +10,12 @@ public class Barang {
     private String warna;
     private int stok;
     private double diskon;
+    private int status; //TAMBAH ATRIBUT BARU UNTUK INFO AKTIF BARANG
     
     public Barang() { }
     // konstruktor
     public Barang (String idBarang, String namaBarang, double hargaJual, double hargaModal, String jenisBarang,
-        String brand, String warna, int stok, double diskon)
+        String brand, String warna, int stok, double diskon, int status)
          {
             this.idBarang = idBarang;
             this.namaBarang = namaBarang;
@@ -25,6 +26,7 @@ public class Barang {
             this.warna = warna;
             this.stok = stok;
             this.diskon = diskon;
+            this.status = status;
     }
 
     // getter
@@ -64,6 +66,10 @@ public class Barang {
         return diskon;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
     // Setter
     public void setIdBarang(String idBarang) {
         this.idBarang = idBarang;
@@ -99,5 +105,9 @@ public class Barang {
 
     public void setDiskon(double diskon) {
         this.diskon = diskon;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

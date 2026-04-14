@@ -2,16 +2,15 @@ package model;
 
 public class DetailPenjualan {
     private int idDetail;
-    private String NoNota;
+    private int idPenjualan;
     private Barang barang;
     private int qty;
     private double subtotal;
 
     public DetailPenjualan() { }
     // konstruktor
-    public DetailPenjualan(int idDetail, String NoNota, Barang barang, int qty) {
+    public DetailPenjualan(int idDetail, int idPenjualan, Barang barang, int qty) {
         this.idDetail = idDetail;
-        this.NoNota = NoNota;
         this.barang = barang;
         this.qty = qty;
        
@@ -29,8 +28,8 @@ public class DetailPenjualan {
         return idDetail;
     }
 
-    public String getnoNota() {
-        return NoNota;
+    public int getIdPenjualan() {
+        return idPenjualan;
     }
 
     public Barang getBarang() {
@@ -50,8 +49,8 @@ public class DetailPenjualan {
         this.idDetail = idDetail;
     }
 
-    public void setnoNota(String NoNota) {
-        this.NoNota = NoNota;
+    public void setIdPenjualan(int idPenjualan) {
+        this.idPenjualan = idPenjualan;
     }
 
     public void setBarang(Barang barang) {

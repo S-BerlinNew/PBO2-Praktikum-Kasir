@@ -1,6 +1,6 @@
 package dao;
 
-import config.Koneksi;
+import config.KoneksiDatabase;
 import model.Barang;
 import model.DetailPenjualan;
 import java.sql.*;
@@ -13,7 +13,7 @@ public class DetailPenjualanDAO {
         List<DetailPenjualan> listDetailPenjualan = new ArrayList<>();
         String sql = "SELECT * FROM detail_penjualan";
         
-        try(Connection conn = Koneksi.getConnection();
+        try(Connection conn = KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery()) {
                 
@@ -26,7 +26,7 @@ public class DetailPenjualanDAO {
 
                     DetailPenjualan ds = new DetailPenjualan(
                         rs.getInt("id_detail"),
-                        rs.getString("no_nota"),
+                        rs.getInt("id_penjualan"),
                         barangAsli,
                         rs.getInt("qty")
                     );
@@ -40,10 +40,10 @@ public class DetailPenjualanDAO {
 
     // Insert ke database
     public void insert(DetailPenjualan dp) {
-        String sql = "INSERT INTO detail_penjualan (no_nota, id_barang, qty, subtotal) VALUES(?, ?, ?, ?)";
-        try(Connection conn = config.Koneksi.getConnection(); 
+        String sql = "INSERT INTO detail_penjualan (id_penjualan, id_barang, qty, subtotal) VALUES(?, ?, ?, ?)";
+        try(Connection conn = config.KoneksiDatabase.getConnection(); 
             PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, dp.getnoNota());
+                ps.setInt(1, dp.getIdPenjualan());
                 ps.setString(2, dp.getBarang().getIdBarang());
                 ps.setInt(3, dp.getQty());
                 ps.setDouble(4, dp.getSubtotal());
