@@ -1,6 +1,7 @@
 package model;
 
 import java.sql.Date;
+import java.util.List;
 
 public class Penjualan {
     private int idPenjualan;
@@ -9,14 +10,14 @@ public class Penjualan {
     private Customer customer;
     private String namaKasir;
     private String metodePembayaran;
-    private double diskon;
+    
     private double totalBayar;
-    private DetailPenjualan detailPenjualan;
+    private List<DetailPenjualan> listDetail;
 
     public Penjualan() { }
     // konstruktor
     public Penjualan(int idPenjualan, String noNota, Date tanggal, Customer customer, String namaKasir, 
-    String metodePembayaran, DetailPenjualan detailPenjualan) 
+    String metodePembayaran, List<DetailPenjualan> listDetail) 
     {
         this.idPenjualan = idPenjualan;
         this.noNota = noNota;
@@ -24,7 +25,7 @@ public class Penjualan {
         this.customer = customer;
         this.namaKasir = namaKasir;
         this.metodePembayaran = metodePembayaran;
-        this.detailPenjualan = detailPenjualan;
+        this.listDetail = listDetail;
     }
 
     // getter
@@ -52,14 +53,13 @@ public class Penjualan {
         return metodePembayaran;
     }
 
-    public double getDiskon() {
-        return diskon;
-    }
-
     public double getTotalBayar() {
         return totalBayar;
     }
 
+    public List<DetailPenjualan> getListDetail() {
+        return listDetail;
+    }
 
     // Setter
     public void setIdPenjualan(int idPenjualan) {
@@ -86,20 +86,22 @@ public class Penjualan {
         this.metodePembayaran = metodePembayaran;
     }
 
-    public void setDiskon(double diskon) {
-        this.diskon = diskon;
-    }
-
     public void setTotalBayar(double totalBayar) {
         this.totalBayar = totalBayar;
     }
 
-    // Method
-    public void hitungDiskon() {
-        this.diskon = (diskon / 100) * detailPenjualan.getSubtotal();
+    public void setListDetail(List<DetailPenjualan> listDetail) {
+        this.listDetail = listDetail;
     }
 
+    // Method
     public void hitungTotalBayar() {
-        this.totalBayar = detailPenjualan.getSubtotal() - diskon;
+        double total = 0;
+        if(listDetail != null) {
+            for (DetailPenjualan dp : listDetail) {
+                total += dp.getSubtotal();
+            }
+        }
+        this.totalBayar = total;
     }
 }

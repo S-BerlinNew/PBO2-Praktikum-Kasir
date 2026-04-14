@@ -112,7 +112,8 @@ public class BarangDAO {
 
     // Insert ke database
     public void insert(Barang b) {
-    String sql = "INSERT INTO barang VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    String sql = "INSERT INTO barang (id_barang, nama_barang, harga_jual, harga_modal," + //
+                "                 jenis_barang, brand, warna, stok, diskon, status) + VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = config.KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
             
@@ -130,6 +131,7 @@ public class BarangDAO {
             ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error Insert Barang : " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

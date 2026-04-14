@@ -11,13 +11,13 @@ public class DetailPenjualan {
     // konstruktor
     public DetailPenjualan(int idDetail, int idPenjualan, Barang barang, int qty) {
         this.idDetail = idDetail;
+        this.idPenjualan = idPenjualan;
         this.barang = barang;
         this.qty = qty;
-       
-        hitungOtomatis(); 
+        updateSubtotal();
     }
 
-    private void hitungOtomatis() {
+    private void updateSubtotal() {
         double hargaKotor = barang.getHargaJual() * qty;
         double nilaiDiskon = hargaKotor * (barang.getDiskon() / 100);
         this.subtotal = hargaKotor - nilaiDiskon;
@@ -55,13 +55,16 @@ public class DetailPenjualan {
 
     public void setBarang(Barang barang) {
         this.barang = barang;
+        updateSubtotal();
     }
 
     public void setQty(int qty) {
         this.qty = qty;
+        updateSubtotal();
     }
 
-    public void setSubtotal(double subTotal) {
-        this.subtotal = subTotal;
+    public void setSubtotal(double subtotal) {
+        this.subtotal = subtotal;
     }
+
 }

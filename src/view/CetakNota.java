@@ -24,13 +24,14 @@ public class CetakNota extends JDialog {
         this.listDetail = listDetail;
 
         setTitle("Nota Penjualan - " + p.getNoNota());
-        setSize(450, 600);
+        setSize(410, 600);
         setLocationRelativeTo(parent);
 
         initLayout();
         generatePreview();
     }
-    
+
+
     private void initLayout() {
         // TODO Auto-generated method stub
         txtPreview = new JTextArea();
@@ -78,20 +79,19 @@ public class CetakNota extends JDialog {
         sb.append("Tanggal : ").append(new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm").format(p.getTanggal())).append("\n");
         sb.append("Customer : ").append(p.getCustomer().getNamaCustomer()).append("\n");
         sb.append("-------------------------------------------------\n");
-        sb.append(String.format("%-20s %-3s %-10s %-10s", "Barang", "Qty", "Harga", "Subtotal\n"));
-        sb.append("-------------------------------------------------\n");
+        sb.append(String.format("%-20s %-3s %-10s %-10s", "Barang", "Qty", "Harga", "Subtotal"));
+        sb.append("\n-------------------------------------------------\n");
 
         for(DetailPenjualan d : listDetail) {
             String nama = d.getBarang().getNamaBarang();
             if(nama.length() > 18 ) nama = nama.substring(0, 15) + "...";
 
-            sb.append(String.format("%-20s %-3d %-10s.0f %-10.0f\n",
+            sb.append(String.format("%-20s %-3d %-10.0f %-10.0f\n",
                     nama, d.getQty(), d.getBarang().getHargaJual(), d.getSubtotal()
             ));
         }
 
         sb.append("-------------------------------------------------\n");
-        sb.append(String.format("Diskon          : %10.0f%%\n", p.getDiskon()));
         sb.append(String.format("TOTAL BAYAR     : Rp %,10.0f\n", p.getTotalBayar()));
         sb.append("-------------------------------------------------\n\n");
         sb.append(centerText("      Terima Kasih Atas Kunjungan Anda!     ",lebarNota)).append("\n");
@@ -129,5 +129,50 @@ public class CetakNota extends JDialog {
                 JOptionPane.showMessageDialog(this, "Eror Saat Membuat PDF" + e.getMessage());
             }
         }
+    }
+
+    // UNTUK TEST TAMPILAN
+    public static void main(String[] args) {
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            // 1. Siapkan Customer
+            model.Customer cust = new model.Customer(1, "Budi Santoso", "0812345", "Pontianak");
+
+            // 2. Siapkan List untuk menampung barang-barang belanjaan
+            java.util.List<model.DetailPenjualan> listBelanja = new java.util.ArrayList<>();
+
+            // --- TAMBAH BARANG 1 ---
+            model.Barang b1 = new model.Barang();
+            b1.setIdBarang("B001");
+            b1.setNamaBarang("Raket Yonex Nano");
+            b1.setHargaJual(50000000);
+            b1.setDiskon(10); // Diskon 10%
+
+            model.DetailPenjualan d1 = new model.DetailPenjualan(1, 0, b1, 2); // Beli 2
+            listBelanja.add(d1);
+
+            // --- TAMBAH BARANG 2 ---
+            model.Barang b2 = new model.Barang();
+            b2.setIdBarang("B002");
+            b2.setNamaBarang("Bola Kasti");
+            b2.setHargaJual(2500000);
+            b2.setDiskon(0); // Gak diskon
+
+            model.DetailPenjualan d2 = new model.DetailPenjualan(2, 0, b2, 5); // Beli 5
+            listBelanja.add(d2);
+
+            // 3. Siapkan Header Penjualan
+            model.Penjualan p = new model.Penjualan();
+            p.setNoNota("NOTA-2023-001");
+            p.setTanggal(new java.sql.Date(System.currentTimeMillis()));
+            p.setCustomer(cust);
+            p.setNamaKasir("Admin Amatir");
+            p.setListDetail(listBelanja); // Masukkan list belanja tadi
+            
+            // PENTING: Hitung total bayarnya
+            p.hitungTotalBayar();
+
+            // 4. Tampilkan Dialog
+            new CetakNota(null, true, p, listBelanja).setVisible(true);
+        });
     }
 }

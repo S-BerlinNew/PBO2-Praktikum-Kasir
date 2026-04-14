@@ -275,6 +275,7 @@ public class FormPenjualan extends JFrame {
         }
         if (txtCustomer.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nama Kasir Belum diisi!");
+            return;
         }
 
         try {
@@ -312,7 +313,6 @@ public class FormPenjualan extends JFrame {
             p.setTotalBayar(totalBelanja);
             p.setNamaKasir(txtAdmin.getText()); 
             p.setMetodePembayaran(metodeTerpilih);
-            p.setDiskon(0);
             
 
             int idPenjualanBaru = pDAO.InsertAndGetId(p);
@@ -362,6 +362,7 @@ public class FormPenjualan extends JFrame {
             labelTotal.setText("TOTAL : Rp 0");
             totalBelanja = 0;
             cbBarang.setSelectedIndex(0);
+            txtAdmin.setText("");
         
 
         } catch (Exception ex) {
