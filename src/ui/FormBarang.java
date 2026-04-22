@@ -69,6 +69,7 @@ public class FormBarang extends JFrame{
         panelInput.add(txtDiskon);
 
         add(panelInput, BorderLayout.NORTH);
+        
 
         // Panel Tabel Tengah
         String[] kolom = {"ID", "Nama", "Harga Jual", "Harga Modal", "Jenis", "Brand", "Warna", "Stok", "Diskon", "Status"};
@@ -88,6 +89,19 @@ public class FormBarang extends JFrame{
         panelTombol.add(btnStatus);
         panelTombol.add(btnRefresh);
         add(panelTombol, BorderLayout.SOUTH);
+
+        JPanel panelKiri = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnBack = new JButton("KEMBALI");
+        btnBack.setBackground(Color.DARK_GRAY);
+        btnBack.setForeground(Color.WHITE);
+        btnBack.addActionListener(e -> this.dispose());
+        panelKiri.add(btnBack);
+
+        JPanel panelBawahFinal = new JPanel(new BorderLayout());
+        panelBawahFinal.add(panelKiri, BorderLayout.WEST);   // Back di pojok kiri
+        panelBawahFinal.add(panelTombol, BorderLayout.CENTER); // CRUD di tengah
+        
+        add(panelBawahFinal, BorderLayout.SOUTH);
 
        
 

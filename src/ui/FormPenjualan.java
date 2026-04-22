@@ -98,12 +98,35 @@ public class FormPenjualan extends JFrame {
         
 
         // Panel bawah untuk Total dan Simpan
-        JPanel panelBawah = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // 1. Baris Pertama (Total & Lanjut) -> Rata Kanan
+        JPanel barisSatu = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         labelTotal = new JLabel("TOTAL : Rp 0");
         labelTotal.setFont(new Font("Arial", Font.BOLD, 18));
+        JButton btnLanjut = new JButton("Lanjutkan Pembayaran");
+        btnLanjut.addActionListener(e -> bukaPilihanPembayaran());
         
-        add(panelBawah, BorderLayout.SOUTH);
+        barisSatu.add(labelTotal);
+        barisSatu.add(btnLanjut);
 
+        // 2. Baris Kedua (Tombol Kembali) -> Rata Kiri
+        JPanel barisDua = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnBack = new JButton("KEMBALI");
+        btnBack.setBackground(Color.DARK_GRAY);
+        btnBack.setForeground(Color.WHITE);
+        btnBack.addActionListener(e -> this.dispose());
+        
+        barisDua.add(btnBack);
+
+        // 3. Panel Utama buat nampung baris 1 dan baris 2
+        JPanel panelBawahFinal = new JPanel(new GridLayout(2, 1));
+        panelBawahFinal.add(barisSatu); // Baris atas
+        panelBawahFinal.add(barisDua);  // Baris bawah
+
+        // 4. Tempel ke Frame Utama (SOUTH)
+        // Pakai panelBawahFinal ya bro, jangan panelBawah lagi
+        add(panelBawahFinal, BorderLayout.SOUTH);
+
+        // Sisanya lanjutin...
         loadBarangKeCombo();
 
 
@@ -136,11 +159,10 @@ public class FormPenjualan extends JFrame {
             }
         });
 
-        JButton btnLanjut = new JButton("Lanjutkan Pembayaran");
-        btnLanjut.addActionListener(e -> bukaPilihanPembayaran());
-        panelBawah.add(labelTotal);
-        panelBawah.add(btnLanjut);
+        
     }
+
+
 
 
 

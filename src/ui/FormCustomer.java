@@ -50,7 +50,20 @@ public class FormCustomer extends JFrame {
         JButton btnRefresh = new JButton("REFRESH");
         panelTombol.add(btnSimpan);
         panelTombol.add(btnRefresh);
-        add(panelTombol, BorderLayout.SOUTH);
+
+        JPanel panelKiri = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnBack = new JButton("KEMBALI");
+        btnBack.setBackground(Color.DARK_GRAY);
+        btnBack.setForeground(Color.WHITE);
+        btnBack.addActionListener(e -> this.dispose());
+        panelKiri.add(btnBack);
+
+        JPanel panelBawahFinal = new JPanel(new BorderLayout());
+        panelBawahFinal.add(panelKiri, BorderLayout.WEST);   // Back di pojok kiri
+        panelBawahFinal.add(panelTombol, BorderLayout.CENTER); // CRUD di tengah
+        
+        // 4. TERAKHIR: Masukkan satu panel utama ini ke SOUTH
+        add(panelBawahFinal, BorderLayout.SOUTH);
 
         // --- Event Handling ---
         loadData();
