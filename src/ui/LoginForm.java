@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import dao.AkunDAO;
 import model.Akun;
+import model.UserSession;
 
 
 public class LoginForm extends JFrame {
@@ -60,7 +61,7 @@ public class LoginForm extends JFrame {
         // 2. Validasi hasilnya
         if (akun != null) {
             JOptionPane.showMessageDialog(this, "Login Berhasil!\nSelamat Datang, " + akun.getNamaLengkap());
-
+            UserSession.setRole(akun.getRole());
             // 3. Buka MainMenu sambil MENGIRIM data akun
             new MainMenu(akun).setVisible(true); 
 

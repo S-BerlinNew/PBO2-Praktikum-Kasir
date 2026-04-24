@@ -54,27 +54,56 @@ public class AkunDAO {
 
     // untuk tambah akun baru
     public boolean insert(Akun a) {
-        String sql = "INSERT INTO akun (username, password, nama_lengkap) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO akun (username, password, nama_lengkap, role) VALUES (?, ?, ?, ?)";
         try (Connection conn = KoneksiDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, a.getUsername());
             ps.setString(2, a.getPassword());
-            ps.setString(3, "Admin Baru");
+            ps.setString(3, a.getNamaLengkap());
+            ps.setString(4, a.getRole());
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            return false;
+        } catch (SQLException e) { 
+            e.printStackTrace();
+            return false; 
         }
     }
 
     // Untuk ganti password dan username
     public boolean update(Akun a) {
-        String sql = "UPDATE akun SET username = ?, password = ? WHERE id_akun = ?";
+        // Query dinamis: kalau password kosong, jangan update password-nya
+        boolean updatePass = a.getPassword() != null && !a.getPassword().isEmpty();
+        String sql = updatePass 
+            ? "UPDATE akun SET nama_lengkap = ?, role = ?, password = ? WHERE id_akun = ?"
+            : "UPDATE akun SET nama_lengkap = ?, role = ? WHERE id_akun = ?";
+
         try (Connection conn = KoneksiDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, a.getUsername());
-            ps.setString(2, a.getPassword());
-            ps.setInt(3, a.getIdAkun());
+            
+            ps.setString(1, a.getNamaLengkap());
+            ps.setString(2, a.getRole());
+            
+            if (updatePass) {
+                ps.setString(3, a.getPassword());
+                ps.setInt(4, a.getIdAkun());
+            } else {
+                ps.setInt(3, a.getIdAkun());
+            }
+            
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) { return false; }
+        } catch (SQLException e) { 
+            e.printStackTrace();
+            return false; 
+        }
+    }
+    public boolean delete(int id) {
+        String sql = "DELETE FROM akun WHERE id_akun = ?";
+        try (Connection conn = KoneksiDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { 
+            e.printStackTrace();
+            return false; 
+        }
     }
 }

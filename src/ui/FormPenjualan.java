@@ -22,7 +22,8 @@ public class FormPenjualan extends JFrame {
     // Atribut Metode Pembayaran
     private String metodeTerpilih = "";
 
-    private JTextField txtCustomer, txtHarga, txtQty, txtNoTelp; //Tempat kasir ngetik sesuatu (Nama Customer, Jumlah Beli).
+    private JTextField txtCustomer, txtHarga, txtQty, txtNoTelp, txtDiskonNota; //Tempat kasir ngetik sesuatu (Nama Customer, Jumlah Beli).
+    private model.Akun userLogin;
     private JTextField txtStokTersedia; //untuk qty yang tersedia setiap barang
     private JComboBox<String> cbBarang; //Tempat milih barang. Biar kasir nggak capek ngetik "Raket Yonex Tipe A-123" berulang kali.
     private JTextField txtAdmin; //Nama admin
@@ -32,25 +33,144 @@ public class FormPenjualan extends JFrame {
     private double totalBelanja = 0;
 
 
-    public FormPenjualan() {
+    public FormPenjualan(model.Akun akun) {
+        this.userLogin = akun; //Untuk simpan data akun yang login
+
         setTitle("Transaksi Penjualan Olahraga - Mode Kasir");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
+        
 
         // PANEL ATAS BAGIAN INPUT DATA
-        JPanel panelAtas = new JPanel(new GridLayout(7, 2, 10, 10));
+        JPanel panelAtas = new JPanel(new GridLayout(9, 2, 10, 10));
         panelAtas.setBorder(BorderFactory.createTitledBorder("Input Transaksi"));
 
-        panelAtas.add(new JLabel("Nama Customer : "));
-        txtCustomer = new JTextField();
-        panelAtas.add(txtCustomer);
+        
+        // ---- 1. Panel Khusus Customer ----
+        panelAtas.add(new JLabel("Pilih/Cari Customer : "));
 
+        JPanel panelCariCustomer = new JPanel(new BorderLayout(5, 5));
+        txtCustomer = new JTextField();
+        txtCustomer.setEditable(false);
+
+        JPanel panelAksiCustomer = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        JButton btnCariCustomer = new JButton("CARI");
+        JButton btnTambahCustomer = new JButton("TAMBAH BARU");
+
+        panelAksiCustomer.add(btnCariCustomer);
+        panelAksiCustomer.add(btnTambahCustomer);
+
+        panelCariCustomer.add(txtCustomer, BorderLayout.CENTER);
+        panelCariCustomer.add(panelAksiCustomer, BorderLayout.EAST);
+
+        panelAtas.add(panelCariCustomer);
+
+        panelAtas.add (new JLabel("Nomor Telephone : "));
+        txtNoTelp = new JTextField();
+        txtNoTelp.setEditable(false);
+        panelAtas.add(txtNoTelp);
+
+        btnTambahCustomer.addActionListener(e -> {
+            // Buka FormCustomer buat input data baru
+            new FormCustomer().setVisible(true);
+        });
+
+        btnCariCustomer.addActionListener(e -> {
+            JDialog d = new JDialog(this, "Cari Customer", true);
+            d.setSize(500, 400);
+            d.setLocationRelativeTo(this);
+            d.setLayout(new BorderLayout(10, 10));
+
+            // 1. Bagian Atas: Input Pencarian
+            JPanel panelCari = new JPanel(new BorderLayout(5, 5));
+            panelCari.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+            panelCari.add(new JLabel("Ketik Nama / No Telp: "), BorderLayout.WEST);
+            
+            JTextField txtCari = new JTextField();
+            panelCari.add(txtCari, BorderLayout.CENTER);
+            d.add(panelCari, BorderLayout.NORTH);
+
+            // 2. Bagian Tengah: Tabel
+            String[] kolomCust = {"ID", "Nama Customer", "No Telp"};
+            DefaultTableModel modelCust = new DefaultTableModel(kolomCust, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) { return false; }
+            };
+            JTable tabelCust = new JTable(modelCust);
+            
+            // Sembunyikan kolom ID biar rapi
+            tabelCust.getColumnModel().getColumn(0).setMinWidth(0);
+            tabelCust.getColumnModel().getColumn(0).setMaxWidth(0);
+
+            // Fungsi Load Data dengan Filter
+            Runnable loadData = () -> {
+                modelCust.setRowCount(0); // Bersihkan tabel
+                String keyword = txtCari.getText().toLowerCase();
+                List<model.Customer> list = cDAO.getAll(); // Ambil semua dari DB
+                
+                int limit = 50; // Kita batesin cuma nampilin 50 data teratas yang cocok
+                int count = 0;
+
+                for (model.Customer c : list) {
+                    // Cek apakah nama atau no telp mengandung kata kunci
+                    if (c.getNamaCustomer().toLowerCase().contains(keyword) || 
+                        c.getNoTelp().contains(keyword)) {
+                        
+                        modelCust.addRow(new Object[]{c.getIdCustomer(), c.getNamaCustomer(), c.getNoTelp()});
+                        count++; // Tambah hitungan setiap ada data yang masuk
+                    }
+
+                    // Kalau sudah mencapai limit, stop perulangan (break)
+                    if (count >= limit) {
+                        break; 
+                    }
+                }
+            };
+
+            // Jalankan load pertama kali
+            loadData.run();
+
+            // Event Ngetik langsung Filter
+            txtCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+                public void insertUpdate(javax.swing.event.DocumentEvent e) { loadData.run(); }
+                public void removeUpdate(javax.swing.event.DocumentEvent e) { loadData.run(); }
+                public void changedUpdate(javax.swing.event.DocumentEvent e) { loadData.run(); }
+            });
+
+            // Pilih Data (Klik Baris)
+            tabelCust.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() == 2) { // Double klik buat pilih
+                        int row = tabelCust.getSelectedRow();
+                        if (row != -1) {
+                            txtCustomer.setText(modelCust.getValueAt(row, 1).toString());
+                            txtNoTelp.setText(modelCust.getValueAt(row, 2).toString());
+                            d.dispose();
+                        }
+                    }
+                }
+            });
+
+            d.add(new JScrollPane(tabelCust), BorderLayout.CENTER);
+            
+            JLabel lblHint = new JLabel(" *Double klik pada baris untuk memilih customer", SwingConstants.LEFT);
+            lblHint.setFont(new Font("Arial", Font.ITALIC, 10));
+            d.add(lblHint, BorderLayout.SOUTH);
+
+            d.setVisible(true);
+        });
+
+
+        // ---- Panel Kasir ----
         panelAtas.add(new JLabel("Nama Kasir : "));
-        txtAdmin = new JTextField();
+        txtAdmin = new JTextField(userLogin.getNamaLengkap());
+        txtAdmin.setEditable(false);
+        txtAdmin.setBackground(new Color(235, 235, 235));
         panelAtas.add(txtAdmin);
 
+        // ---- Panel Pilih Barang -----
         panelAtas.add(new JLabel("Pilih Barang : "));
         cbBarang = new JComboBox<>();
         panelAtas.add(cbBarang);
@@ -69,16 +189,28 @@ public class FormPenjualan extends JFrame {
         txtQty = new JTextField();
         panelAtas.add(txtQty);
 
-        panelAtas.add(new JLabel("Nomor Telephone : "));
-        txtNoTelp = new JTextField();
-        panelAtas.add(txtNoTelp);
+        // Cukup satu kali inisialisasi
+        txtDiskonNota = new JTextField("0", 10); 
+        panelAtas.add(new JLabel("Diskon (%): "));
+        panelAtas.add(txtDiskonNota);
 
+        
+        txtDiskonNota.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                updateTotalSeluruhnya(); }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                updateTotalSeluruhnya(); }
+
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { 
+                updateTotalSeluruhnya(); }
+        });
+        
         add(panelAtas, BorderLayout.NORTH);
 
 
-
         // Panel Tengah untuk Tabel Keranjang
-        String[] kolom = {"ID Barang", "Nama Barang", "Harga", "Qty", "Dsikon (%)","Subtotal", "No Telp"};
+        String[] kolom = {"ID Barang", "Nama Barang", "Harga", "Qty","Subtotal"};
         modelTabel = new DefaultTableModel(kolom, 0);
         tabelKeranjang = new JTable(modelTabel);
 
@@ -102,11 +234,14 @@ public class FormPenjualan extends JFrame {
         JPanel barisSatu = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         labelTotal = new JLabel("TOTAL : Rp 0");
         labelTotal.setFont(new Font("Arial", Font.BOLD, 18));
+
         JButton btnLanjut = new JButton("Lanjutkan Pembayaran");
         btnLanjut.addActionListener(e -> bukaPilihanPembayaran());
-        
+
         barisSatu.add(labelTotal);
         barisSatu.add(btnLanjut);
+
+        
 
         // 2. Baris Kedua (Tombol Kembali) -> Rata Kiri
         JPanel barisDua = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -151,19 +286,14 @@ public class FormPenjualan extends JFrame {
         btnHapus.addActionListener(e -> {
             int baris = tabelKeranjang.getSelectedRow();
             if (baris != -1) {
-                // Pakai Double.parseDouble dan toString() biar gak kena ClassCastException
-                double sub = Double.parseDouble(modelTabel.getValueAt(baris, 5).toString());
-                totalBelanja -= sub;
-                labelTotal.setText("TOTAL : Rp " + String.format("%.0f", totalBelanja));
+                // Kolom 4 adalah Subtotal
                 modelTabel.removeRow(baris);
+                updateTotalSeluruhnya();
             }
         });
 
         
     }
-
-
-
 
 
 
@@ -200,34 +330,61 @@ public class FormPenjualan extends JFrame {
     private void tambahKeTabel() {
         try {
             String pilihan = cbBarang.getSelectedItem().toString();
-            String id = pilihan.split(" - ")[0]; // Ambil ID dari teks combo
+            String id = pilihan.split(" - ")[0];
             int qty = Integer.parseInt(txtQty.getText());
-            String noTelp = txtNoTelp.getText();
-            String namaAdmin = txtAdmin.getText();
 
             Barang b = bDAO.getById(id);
             if (b != null) {
-                DetailPenjualan detail = new DetailPenjualan(0, 0, b, qty);
+                // MASUKKAN HARGA ASLI KE TABEL
+                double subtotal = b.getHargaJual() * qty;
 
-                // Masukkan 6 data sesuai array 'kolom'
                 modelTabel.addRow(new Object[]{
-                    b.getIdBarang(),    // Kolom 0 (ID - Tersembunyi)
-                    b.getNamaBarang(),  // Kolom 1
-                    b.getHargaJual(),    // Kolom 2
-                    qty,                // Kolom 3
-                    b.getDiskon() + "%",// Kolom 4
-                    detail.getSubtotal(),// Kolom 5
-                    noTelp,
-                    namaAdmin
+                    b.getIdBarang(),
+                    b.getNamaBarang(),
+                    b.getHargaJual(), // Harga Normal
+                    qty,
+                    subtotal          // Subtotal Normal
                 });
 
-                totalBelanja += detail.getSubtotal();
-                labelTotal.setText("TOTAL : Rp " + String.format("%.0f", totalBelanja));
+                updateTotalSeluruhnya(); // Biarkan fungsi ini yang urus diskon di akhir
                 txtQty.setText("");
+                cbBarang.requestFocus();
             }
+            txtQty.setText("");         
+            txtHarga.setText("");       
+            txtStokTersedia.setText("");  
+            cbBarang.setSelectedIndex(0); 
+            cbBarang.requestFocus();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Pilih barang dan isi Qty!");
+            JOptionPane.showMessageDialog(this, "Pilih barang dan isi Qty dengan angka!");
         }
+    }
+
+    private void updateTotalSeluruhnya() {
+        double totalKotor = 0;
+        // 1. Hitung total kotor dari tabel
+        for (int i = 0; i < modelTabel.getRowCount(); i++) {
+            totalKotor += Double.parseDouble(modelTabel.getValueAt(i, 4).toString());
+        }
+
+        // 2. Ambil diskon persen dari textfield
+        double persenDiskon = 0;
+        try {
+            if (!txtDiskonNota.getText().isEmpty()) {
+                persenDiskon = Double.parseDouble(txtDiskonNota.getText());
+            }
+        } catch (Exception e) { 
+            persenDiskon = 0; 
+        }
+
+        // 3. Hitung nominal diskon
+        double nominalDiskon = (persenDiskon / 100) * totalKotor;
+
+        // 4. Hitung total akhir
+        totalBelanja = totalKotor - nominalDiskon;
+        
+        // 5. Update label
+        labelTotal.setText("TOTAL : Rp " + String.format("%.0f", totalBelanja));
     }
 
 
@@ -295,7 +452,7 @@ public class FormPenjualan extends JFrame {
             JOptionPane.showMessageDialog(this, "Keranjang belanja masih kosong!");
             return;
         }
-        if (txtCustomer.getText().isEmpty()) {
+        if (txtAdmin.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nama Kasir Belum diisi!");
             return;
         }
@@ -312,9 +469,9 @@ public class FormPenjualan extends JFrame {
                 // Kalau namanya BELUM ADA di DB, kita buat baru otomatis
                 cust = new model.Customer();
                 cust.setNamaCustomer(namaInput);
-                cust.setKodeCustomer("CUST-" + System.currentTimeMillis());
+                cust.setKodeCustomer(cDAO.generateKodeBaru());
                 cust.setNoTelp(txtNoTelp.getText());
-                
+
                 // Simpan ke database dan ambil ID otomatisnya (Auto Increment)
                 int idBaru = cDAO.insertAndGetId(cust); 
 
@@ -330,19 +487,42 @@ public class FormPenjualan extends JFrame {
             // --- STEP 2: SIMPAN HEADER (Ke Tabel penjualan) ---
             Penjualan p = new Penjualan();
             p.setNoNota("NOT-" + System.currentTimeMillis());
-            p.setTanggal(new java.sql.Date(System.currentTimeMillis())); // Pakai sql date biar aman ke DB
-            p.setCustomer(cust); // Pakai objek cust hasil pencarian/pembuatan di atas
-            p.setTotalBayar(totalBelanja);
+            p.setTanggal(new java.sql.Date(System.currentTimeMillis()));
+            p.setCustomer(cust);
+
+            // 1. Hitung Total Kotor
+            double totalKotor = 0;
+                for (int i = 0; i < modelTabel.getRowCount(); i++) {
+                    totalKotor += Double.parseDouble(modelTabel.getValueAt(i, 4).toString());
+                }
+
+            // 2. Ambil Angka Persen dengan proteksi (biar gak error kalau kosong)
+            double angkaPersen = 0;
+            String txtDiskon = txtDiskonNota.getText().trim();
+                if (!txtDiskon.isEmpty()) {
+                    try {
+                        angkaPersen = Double.parseDouble(txtDiskon);
+                    } catch (NumberFormatException e) {
+                        angkaPersen = 0;
+                    }
+                }
+
+            // 3. Hitung Nominal Diskon
+            double nominalDiskon = (angkaPersen / 100) * totalKotor; 
+
+            // 4. Set ke Objek
+            p.setDiskon((int) nominalDiskon); 
+            p.setTotalBayar(totalBelanja); 
             p.setNamaKasir(txtAdmin.getText()); 
             p.setMetodePembayaran(metodeTerpilih);
-            
+            System.out.println("LOG: Mengirim diskon ke nota sebesar " + nominalDiskon);
 
+            // 5. Eksekusi Simpan
             int idPenjualanBaru = pDAO.InsertAndGetId(p);
-
-            if(idPenjualanBaru == 0) {
-                JOptionPane.showMessageDialog(this, "Gagal simpan header penjualan!");
-                return;
-            }
+                if(idPenjualanBaru == 0) {
+                    JOptionPane.showMessageDialog(this, "Gagal simpan header penjualan! Cek koneksi database.");
+                    return;
+                }
 
 
             // --- STEP 3: SIMPAN DETAIL ---
@@ -362,7 +542,7 @@ public class FormPenjualan extends JFrame {
                 int qty = Integer.parseInt(modelTabel.getValueAt(i, 3).toString());
                 dp.setQty(qty);
                 
-                double subtotal = Double.parseDouble(modelTabel.getValueAt(i, 5).toString());
+                double subtotal = Double.parseDouble(modelTabel.getValueAt(i, 4).toString());
                 dp.setSubtotal(subtotal);
 
                 dpDAO.insert(dp); 
@@ -384,7 +564,6 @@ public class FormPenjualan extends JFrame {
             labelTotal.setText("TOTAL : Rp 0");
             totalBelanja = 0;
             cbBarang.setSelectedIndex(0);
-            txtAdmin.setText("");
         
 
         } catch (Exception ex) {
@@ -396,7 +575,16 @@ public class FormPenjualan extends JFrame {
     public static void main(String[] args) {
         // Cara jalanin GUI biar stabil
         SwingUtilities.invokeLater(() -> {
-            new FormPenjualan().setVisible(true);
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                
+                model.Akun akunTesting = new model.Akun(99, "tester", "123", "Kasir Testing", "Kasir");
+
+                new FormPenjualan(akunTesting).setVisible(true);
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
         });
     }
 }

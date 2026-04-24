@@ -28,7 +28,8 @@ public class DetailPenjualanDAO {
                         rs.getInt("id_detail"),
                         rs.getInt("id_penjualan"),
                         barangAsli,
-                        rs.getInt("qty")
+                        rs.getInt("qty"),
+                        rs.getDouble("subtotal")
                     );
                     listDetailPenjualan.add(ds);
                 }
@@ -51,6 +52,7 @@ public class DetailPenjualanDAO {
                 ps.executeUpdate();
             } catch (SQLException e) {
                 System.out.println("Eror insert Detail Penjualan " + e.getMessage());
+                e.printStackTrace();
             }
     }
 }

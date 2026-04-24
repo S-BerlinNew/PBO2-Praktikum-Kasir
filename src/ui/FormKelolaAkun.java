@@ -83,7 +83,17 @@ public class FormKelolaAkun extends JDialog {
         add(panelBawahFinal, BorderLayout.SOUTH);
 
         // BAGIAN LOGIKA BUTTON
-        btnSimpan.addActionListener(e -> simpanAkun());
+        btnSimpan.addActionListener(e -> tampilkanFormInput(null));
+        
+        btnUpdate.addActionListener(e -> {
+            if(idDipilih != -1) {
+                //Objek akun dari data yang dipilih
+                Akun a = new Akun(idDipilih, txtUsername.getText(), "", txtNama.getText(), cbRole.getSelectedItem().toString());
+                tampilkanFormInput(a);
+            } else {
+                JOptionPane.showMessageDialog(this, "Pilih akun ditabel terlebih dahulu!");
+            }
+        });
         
         btnHapus.addActionListener(e -> hapusAkun());
 
@@ -110,6 +120,60 @@ public class FormKelolaAkun extends JDialog {
         }
     }
 
+    public void tampilkanFormInput(Akun dataEdit) {
+        String judul = (dataEdit == null) ? "Tambah Akun Baru" : "Update Akun: " + dataEdit.getUsername();
+        JDialog d = new JDialog(this, judul, true);
+        d.setSize(400, 300);
+        d.setLocationRelativeTo(this);
+        d.setLayout(new GridLayout(5, 2, 10, 10));
+        ((JPanel)d.getContentPane()).setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JTextField tUser = new JTextField();
+        JPasswordField tPass = new JPasswordField();
+        JTextField tNama = new JTextField();
+        JComboBox<String> cRole = new JComboBox<>(new String[]{"admin", "kasir"});
+
+        if (dataEdit != null) {
+            tUser.setText(dataEdit.getUsername());
+            tUser.setEditable(false); // Username jangan diganti pas update
+            tNama.setText(dataEdit.getNamaLengkap());
+            cRole.setSelectedItem(dataEdit.getRole());
+        }
+
+        d.add(new JLabel("Username:")); d.add(tUser);
+        d.add(new JLabel("Password:")); d.add(tPass);
+        d.add(new JLabel("Nama Lengkap:")); d.add(tNama);
+        d.add(new JLabel("Role:")); d.add(cRole);
+
+        JButton bSimpan = new JButton("OK, SIMPAN");
+        bSimpan.addActionListener(ev -> {
+            String pass = new String(tPass.getPassword());
+            
+            if (dataEdit == null) {
+                // LOGIKA INSERT
+                Akun baru = new Akun(0, tUser.getText(), pass, tNama.getText(), cRole.getSelectedItem().toString());
+                if(aDAO.insert(baru)) {
+                    JOptionPane.showMessageDialog(d, "Akun Berhasil Dibuat!");
+                    d.dispose();
+                }
+            } else {
+                // LOGIKA UPDATE
+                dataEdit.setNamaLengkap(tNama.getText());
+                dataEdit.setRole(cRole.getSelectedItem().toString());
+                if(!pass.isEmpty()) dataEdit.setPassword(pass); // Update pass cuma kalau diisi
+                
+                if(aDAO.update(dataEdit)) {
+                    JOptionPane.showMessageDialog(d, "Akun Berhasil Diperbarui!");
+                    d.dispose();
+                }
+            }
+            muatData();
+        });
+
+        d.add(new JLabel("")); d.add(bSimpan);
+        d.setVisible(true);
+    }
+
     private void simpanAkun() {
         Akun a = new Akun();
         a.setUsername(txtUsername.getText());
@@ -124,10 +188,23 @@ public class FormKelolaAkun extends JDialog {
     }
 
     private void hapusAkun() {
-        if(idDipilih == -1) return;
-        int konfirm = JOptionPane.showConfirmDialog(this, "Apakah Anda yakin ingin mengapus akun ini?", "Konfirmasi", JOptionPane.YES_NO_CANCEL_OPTION);
-        if(konfirm == JOptionPane.YES_NO_OPTION) {
-            muatData();
+        if(idDipilih == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih akun di tabel dulu!");
+            return;
+        }
+        
+        int konfirm = JOptionPane.showConfirmDialog(this, 
+            "Apakah Anda yakin ingin menghapus akun ini?", "Konfirmasi Hapus", 
+            JOptionPane.YES_NO_OPTION);
+            
+        if(konfirm == JOptionPane.YES_OPTION) {
+            if(aDAO.delete(idDipilih)) { // Panggil DAO buat hapus
+                JOptionPane.showMessageDialog(this, "Akun Berhasil Dihapus!");
+                idDipilih = -1; // Reset ID pilihan
+                muatData();
+            } else {
+                JOptionPane.showMessageDialog(this, "Gagal menghapus akun!");
+            }
         }
     }
 }

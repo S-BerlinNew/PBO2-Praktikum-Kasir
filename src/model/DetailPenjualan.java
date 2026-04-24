@@ -9,18 +9,16 @@ public class DetailPenjualan {
 
     public DetailPenjualan() { }
     // konstruktor
-    public DetailPenjualan(int idDetail, int idPenjualan, Barang barang, int qty) {
+    public DetailPenjualan(int idDetail, int idPenjualan, Barang barang, int qty, double subtotal) {
         this.idDetail = idDetail;
         this.idPenjualan = idPenjualan;
         this.barang = barang;
         this.qty = qty;
-        updateSubtotal();
+        this.subtotal = subtotal;
     }
 
-    private void updateSubtotal() {
-        double hargaKotor = barang.getHargaJual() * qty;
-        double nilaiDiskon = hargaKotor * (barang.getDiskon() / 100);
-        this.subtotal = hargaKotor - nilaiDiskon;
+    public void hitungSubtotal() {
+        this.subtotal = barang.getHargaJual() * qty;
     }
 
     // getter
@@ -55,12 +53,12 @@ public class DetailPenjualan {
 
     public void setBarang(Barang barang) {
         this.barang = barang;
-        updateSubtotal();
+        hitungSubtotal();
     }
 
     public void setQty(int qty) {
         this.qty = qty;
-        updateSubtotal();
+        hitungSubtotal();
     }
 
     public void setSubtotal(double subtotal) {

@@ -27,7 +27,6 @@ public class BarangDAO {
                         rs.getString("brand"),
                         rs.getString("warna"),
                         rs.getInt("stok"),
-                        rs.getDouble("diskon"),
                         rs.getInt("status")
                     );
                     listBarang.add(b); //datar antrian list
@@ -55,7 +54,6 @@ public class BarangDAO {
                     rs.getString("brand"),
                     rs.getString("warna"),
                     rs.getInt("stok"),
-                    rs.getDouble("diskon"),
                     rs.getInt("status")
                 );
                 listBarang.add(b);
@@ -86,7 +84,6 @@ public class BarangDAO {
                             rs.getString("brand"),
                             rs.getString("warna"),
                             rs.getInt("stok"),
-                            rs.getDouble("diskon"),
                             rs.getInt("status")
                         );
                     }
@@ -113,7 +110,7 @@ public class BarangDAO {
     // Insert ke database
     public void insert(Barang b) {
     String sql = "INSERT INTO barang (id_barang, nama_barang, harga_jual, harga_modal," + //
-                "                 jenis_barang, brand, warna, stok, diskon, status) + VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "                 jenis_barang, brand, warna, stok, diskon, status)" + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = config.KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
             
@@ -125,8 +122,8 @@ public class BarangDAO {
             ps.setString(6, b.getBrand());
             ps.setString(7, b.getWarna());
             ps.setInt(8, b.getStok());
-            ps.setDouble(9, b.getDiskon());
-            ps.setInt(10, 1);
+            ps.setInt(9, 0);
+            ps.setInt(10, b.getStatus());
             
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -149,7 +146,7 @@ public class BarangDAO {
             ps.setString(5, b.getBrand());
             ps.setString(6, b.getWarna());
             ps.setInt(7, b.getStok());
-            ps.setDouble(8, b.getDiskon());
+            ps.setInt(8, 0);
             ps.setString(9, b.getIdBarang());
 
             ps.executeUpdate();

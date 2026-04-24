@@ -14,7 +14,7 @@ import java.awt.event.MouseEvent;
 public class FormBarang extends JFrame{
 
     // Komponen
-    private JTextField txtId, txtNama, txtHargaJual, txtHargaModal, txtJenis, txtBrand, txtWarna, txtStok, txtDiskon;
+    private JTextField txtId, txtNama, txtHargaJual, txtHargaModal, txtJenis, txtBrand, txtWarna, txtStok;
     private JTable tabelBarang;
     private DefaultTableModel modelTabel;
     private BarangDAO bDAO = new BarangDAO();
@@ -64,15 +64,11 @@ public class FormBarang extends JFrame{
         txtStok = new JTextField();
         panelInput.add(txtStok);
 
-        panelInput.add(new JLabel("Diskon (%):")); // <--- Bintang Tamu Kita
-        txtDiskon = new JTextField("0");
-        panelInput.add(txtDiskon);
-
         add(panelInput, BorderLayout.NORTH);
         
 
         // Panel Tabel Tengah
-        String[] kolom = {"ID", "Nama", "Harga Jual", "Harga Modal", "Jenis", "Brand", "Warna", "Stok", "Diskon", "Status"};
+        String[] kolom = {"ID", "Nama", "Harga Jual", "Harga Modal", "Jenis", "Brand", "Warna", "Stok", "Status"};
         modelTabel = new DefaultTableModel(kolom, 0);
         tabelBarang = new JTable(modelTabel);
         add(new JScrollPane(tabelBarang), BorderLayout.CENTER);
@@ -123,7 +119,6 @@ public class FormBarang extends JFrame{
                         txtBrand.setText(b.getBrand());
                         txtWarna.setText(b.getWarna());
                         txtStok.setText(String.valueOf(b.getStok()));
-                        txtDiskon.setText(String.valueOf(b.getDiskon()));
 
                         statusSementara = b.getStatus();
                     }
@@ -178,7 +173,7 @@ public class FormBarang extends JFrame{
         int baris = tabelBarang.getSelectedRow();
         if (baris != -1) {
             String id = modelTabel.getValueAt(baris, 0).toString();
-            String statusSekarang = modelTabel.getValueAt(baris, 9).toString();
+            String statusSekarang = modelTabel.getValueAt(baris, 8).toString();
             
             int statusBaru = statusSekarang.equals("AKTIF") ? 0 : 1;
             String pesan = (statusBaru == 0) ? "Non-aktifkan barang?" : "Aktifkan kembali barang?";
@@ -203,7 +198,6 @@ public class FormBarang extends JFrame{
             txtBrand.getText(),
             txtWarna.getText(), 
             Integer.parseInt(txtStok.getText()),
-            Double.parseDouble(txtDiskon.getText()), 
             statusSementara
         );
     }
@@ -218,7 +212,6 @@ public class FormBarang extends JFrame{
         txtBrand.setText("");
         txtWarna.setText("");
         txtStok.setText("");
-        txtDiskon.setText("0");
         tabelBarang.clearSelection();
     }
 
@@ -231,7 +224,7 @@ public class FormBarang extends JFrame{
             modelTabel.addRow(new Object[]{
                 b.getIdBarang(), b.getNamaBarang(), b.getHargaJual(),
                 b.getHargaModal(), b.getJenisBarang(), b.getBrand(),
-                b.getWarna(), b.getStok(), b.getDiskon() + "%",
+                b.getWarna(), b.getStok(),
                 statusTeks
             });
         }

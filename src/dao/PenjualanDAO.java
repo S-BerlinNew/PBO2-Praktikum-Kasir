@@ -27,6 +27,7 @@ public class PenjualanDAO {
                         cDummy,
                         rs.getString("nama_kasir"),
                         rs.getString("metode_pembayaran"),
+                        rs.getInt("diskon"),
                         new ArrayList<>()
                     );
                     listPenjualan.add(p);
@@ -39,7 +40,7 @@ public class PenjualanDAO {
 
     // Insert ke Database
     public int InsertAndGetId(Penjualan p) {
-        String sql = "INSERT INTO penjualan (no_nota, tanggal, id_customer, nama_kasir, metode_pembayaran, total_bayar)" + "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO penjualan (no_nota, tanggal, id_customer, nama_kasir, metode_pembayaran, diskon, total_bayar) VALUES (?, ?, ?, ?, ?, ?, ?)";
         int generatedId = 0;
         
         try (Connection conn = config.KoneksiDatabase.getConnection();
@@ -50,7 +51,8 @@ public class PenjualanDAO {
                 ps.setInt(3, p.getCustomer().getIdCustomer());
                 ps.setString(4, p.getNamaKasir());
                 ps.setString(5, p.getMetodePembayaran());
-                ps.setDouble(6, p.getTotalBayar());
+                ps.setInt(6, p.getDiskon());
+                ps.setDouble(7, p.getTotalBayar());
 
                 ps.executeUpdate();
                 try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -60,6 +62,7 @@ public class PenjualanDAO {
         }
             } catch (SQLException e) {
                 System.out.println("Eror insert Penjualan : " + e.getMessage());
+                e.printStackTrace();
             }
             return generatedId;
     }

@@ -54,7 +54,7 @@ public class MainMenu extends JFrame {
         });
 
         btnPenjualan.addActionListener(e -> {
-            new FormPenjualan().setVisible(true);
+            new FormPenjualan(this.userLogin).setVisible(true);
         });
 
         btnCustomer.addActionListener(e -> {
