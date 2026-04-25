@@ -1,7 +1,20 @@
 package com.kasir.app.ui;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
 import com.kasir.app.dao.AkunDAO;
 import com.kasir.app.model.Akun;
 import com.kasir.app.model.UserSession;
@@ -66,7 +79,7 @@ public class LoginForm extends JFrame {
             UserSession.setRole(akun.getRole());
             UserSession.setUsername(akun.getUsername());
 
-            new MainMenu(akun).setVisible(true); 
+            new com.kasir.app.ui.MainMenu(akun).setVisible(true);
 
             this.dispose(); // Tutup form login
         } else {
