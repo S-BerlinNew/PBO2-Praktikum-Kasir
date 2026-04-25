@@ -130,7 +130,6 @@ public class CetakNota extends JDialog {
     private void saveToPDF() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Pilih Tempat Simpan Nota");
-        // PERBAIKAN: Hilangkan tanda '+' yang tidak perlu di nama file
         chooser.setSelectedFile(new java.io.File("Nota_" + p.getNoNota() + ".pdf"));
 
         if(chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {

@@ -40,7 +40,7 @@ public class FormLaporan extends JFrame {
         panelUtamaFilter = new JPanel(new CardLayout());
         panelUtamaFilter.setBorder(BorderFactory.createTitledBorder("Filter Laporan"));
 
-        // -- Filter untuk Transaksi --
+        // === FILTER TRANSAKSI ====
         panelFilterMaster = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         txtCari = new JTextField(10);
         txtCariKasir = new JTextField(10);
@@ -66,7 +66,7 @@ public class FormLaporan extends JFrame {
         panelFilterMaster.add(btnFilterTgl);
         panelFilterMaster.add(btnReset);
 
-        // -- Filter untuk Log --
+        // === FILTER LOG AKTIVITAS ===
         panelFilterLog = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         txtCariLog = new JTextField(20);
         JButton btnResetLog = new JButton("Reset Log");
