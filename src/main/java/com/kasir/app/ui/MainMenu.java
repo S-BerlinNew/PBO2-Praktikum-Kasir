@@ -1,7 +1,22 @@
 package com.kasir.app.ui;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import com.kasir.app.model.Akun;
 
@@ -9,14 +24,11 @@ public class MainMenu extends JFrame {
     private Akun userLogin;
     private JButton activeButton = null;
 
-    // PANEL UTAMA (CONTENT)
-    private JPanel contentPanel;
-
     public MainMenu(Akun akun) {
         this.userLogin = akun;
 
         setTitle("Sistem Penjualan Alat Olahraga - v1.0");
-        setSize(1000, 600);
+        setSize(900, 550);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -76,31 +88,36 @@ public class MainMenu extends JFrame {
         JButton btnLogout = new JButton("Logout");
         btnLogout.setBackground(new Color(231, 76, 60));
         btnLogout.setForeground(Color.WHITE);
+        btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnLogout.setFocusPainted(false);
+        btnLogout.setBorderPainted(false);
+        btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        bottom.add(btnLogout);
+        btnLogout.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnLogout.setBackground(new Color(192, 57, 43));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnLogout.setBackground(new Color(231, 76, 60));
+            }
+        });
 
-        // ================= CONTENT =================
-        contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(Color.WHITE);
+        bottom.add(btnLogout, BorderLayout.CENTER);
 
-        JLabel welcome = new JLabel("Selamat Datang di Sistem Kasir", SwingConstants.CENTER);
-        welcome.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        contentPanel.add(welcome, BorderLayout.CENTER);
-
-        // ================= ACTION =================
+        // ================= NAVIGASI =================
         btnBarang.addActionListener(e -> {
             setActiveButton(btnBarang);
-            tampilkanFrame(new FormBarang());
+            new FormBarang().setVisible(true);
         });
 
         btnCustomer.addActionListener(e -> {
             setActiveButton(btnCustomer);
-            tampilkanFrame(new FormCustomer());
+            new FormCustomer().setVisible(true);
         });
 
         btnPenjualan.addActionListener(e -> {
             setActiveButton(btnPenjualan);
-            tampilkanFrame(new FormPenjualan(userLogin));
+            new FormPenjualan(userLogin).setVisible(true);
         });
 
         btnAkun.addActionListener(e -> {
@@ -110,12 +127,19 @@ public class MainMenu extends JFrame {
 
         btnLaporan.addActionListener(e -> {
             setActiveButton(btnLaporan);
-            tampilkanFrame(new FormLaporan());
+            new FormLaporan().setVisible(true);
         });
 
         btnLogout.addActionListener(e -> {
-            dispose();
-            new LoginForm().setVisible(true);
+            int konfirm = JOptionPane.showConfirmDialog(this,
+                    "Yakin logout?",
+                    "Logout",
+                    JOptionPane.YES_NO_OPTION);
+
+            if (konfirm == JOptionPane.YES_OPTION) {
+                dispose();
+                new LoginForm().setVisible(true);
+            }
         });
 
         // ROLE
@@ -130,32 +154,48 @@ public class MainMenu extends JFrame {
         sidebar.add(bottom, BorderLayout.SOUTH);
 
         add(sidebar, BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
+
+        // ================= CONTENT =================
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(new Color(245, 247, 250));
+
+        JLabel welcome = new JLabel("Selamat Datang di Sistem Kasir", SwingConstants.CENTER);
+        welcome.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        welcome.setForeground(new Color(44, 62, 80));
+
+        content.add(welcome, BorderLayout.CENTER);
+
+        add(content, BorderLayout.CENTER);
     }
 
-    // ================= METHOD TAMBAHAN =================
-
-    private void tampilkanFrame(JFrame frame) {
-        contentPanel.removeAll();
-
-        frame.setUndecorated(true); // hapus border window
-        frame.setVisible(true);
-
-        contentPanel.add(frame.getContentPane(), BorderLayout.CENTER);
-
-        contentPanel.revalidate();
-        contentPanel.repaint();
-    }
-
+    // ================= BUTTON =================
     private JButton createMenuButton(String text) {
         JButton btn = new JButton(text);
+
         btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
         btn.setBackground(new Color(36, 52, 71));
         btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (btn != activeButton) {
+                    btn.setBackground(new Color(52, 73, 94));
+                }
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (btn != activeButton) {
+                    btn.setBackground(new Color(36, 52, 71));
+                }
+            }
+        });
+
         return btn;
     }
 
