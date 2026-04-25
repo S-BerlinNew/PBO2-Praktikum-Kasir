@@ -2,6 +2,9 @@ package ui;
 
 import java.awt.*;
 import javax.swing.*;
+import dao.AkunDAO;
+import model.Akun;
+import model.UserSession;
 
 
 public class LoginForm extends JFrame {
@@ -42,28 +45,29 @@ public class LoginForm extends JFrame {
 
         JPanel panelButton = new JPanel();
         panelButton.add(btnLogin);
+        getRootPane().setDefaultButton(btnLogin);
 
         add(panelButton, BorderLayout.SOUTH);
     }
 
     private void prosesLogin() {
+    String username = txtUsername.getText();
+    String password = new String(txtPassword.getPassword());
 
-        String username = txtUsername.getText();
-        String password = new String(txtPassword.getPassword());
+        // 1. Panggil AkunDAO untuk cek ke Database
+        AkunDAO aDAO = new AkunDAO();
+        Akun akun = aDAO.cekLogin(username, password);
 
-        // username & password sementara
-        if(username.equals("admin") && password.equals("123")) {
+        // 2. Validasi hasilnya
+        if (akun != null) {
+            JOptionPane.showMessageDialog(this, "Login Berhasil!\nSelamat Datang, " + akun.getNamaLengkap());
+            UserSession.setRole(akun.getRole());
+            // 3. Buka MainMenu sambil MENGIRIM data akun
+            new MainMenu(akun).setVisible(true); 
 
-            JOptionPane.showMessageDialog(this,"Login berhasil!");
-
-            new MainMenu().setVisible(true);
-
-            this.dispose(); // tutup form login
-
+            this.dispose(); // Tutup form login
         } else {
-
-            JOptionPane.showMessageDialog(this,"Username / Password salah");
-
+            JOptionPane.showMessageDialog(this, "Username atau Password salah!", "Login Gagal", JOptionPane.ERROR_MESSAGE);
         }
     }
 

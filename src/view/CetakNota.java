@@ -20,6 +20,11 @@ public class CetakNota extends JDialog {
 
     public CetakNota(Frame parent, boolean model, Penjualan p, List<DetailPenjualan>listDetail) {
         super(parent, model);
+        if (p == null) {
+            JOptionPane.showMessageDialog(parent, "Data Penjualan Kosong!");
+            this.dispose();
+            return;
+        }
         this.p = p;
         this.listDetail = listDetail;
 
@@ -70,63 +75,88 @@ public class CetakNota extends JDialog {
         int lebarNota = 45;
         StringBuilder sb = new StringBuilder();
 
+        // --- HEADER ---
         sb.append(centerText("Toko Olahraga Amatir", lebarNota)).append("\n");
-        sb.append(centerText("Toko Olahraga Pontianak Jl. Purnama 2", lebarNota)).append("\n");
-        sb.append(centerText("Kota Pontianak, Kalimantan Barat", lebarNota)).append("\n");
+        sb.append(centerText("Jl. Purnama 2, Kota Pontianak", lebarNota)).append("\n");
+        sb.append(centerText("Kalimantan Barat", lebarNota)).append("\n");
         sb.append("-------------------------------------------------\n");
-        sb.append("No Nota : ").append(p.getNoNota()).append("\n");
-        sb.append("Kasir : ").append(p.getNamaKasir()).append("\n");
-        sb.append("Tanggal : ").append(new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm").format(p.getTanggal())).append("\n");
-        sb.append("Customer : ").append(p.getCustomer().getNamaCustomer()).append("\n");
+        sb.append(String.format("No Nota  : %s\n", p.getNoNota()));
+        sb.append(String.format("Kasir    : %s\n", p.getNamaKasir()));
+        sb.append(String.format("Tanggal  : %s\n", new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm").format(p.getTanggal())));
+        
+        String namaCust = (p.getCustomer() != null) ? p.getCustomer().getNamaCustomer() : "Umum";
+        sb.append(String.format("Customer : %s\n", namaCust));
         sb.append("-------------------------------------------------\n");
-        sb.append(String.format("%-20s %-3s %-10s %-10s", "Barang", "Qty", "Harga", "Subtotal"));
+        sb.append(String.format("%-20s %-3s %-10s %-12s", "Barang", "Qty", "Harga", "Subtotal"));
         sb.append("\n-------------------------------------------------\n");
 
-        for(DetailPenjualan d : listDetail) {
-            String nama = d.getBarang().getNamaBarang();
-            if(nama.length() > 18 ) nama = nama.substring(0, 15) + "...";
+        // --- ISI BARANG & HITUNG TOTAL KOTOR ---
+        double totalKotor = 0;
+        if (listDetail != null) {
+            for(DetailPenjualan d : listDetail) {
+                String nama = d.getBarang().getNamaBarang();
+                if(nama.length() > 18 ) nama = nama.substring(0, 15) + "...";
 
-            sb.append(String.format("%-20s %-3d %-10.0f %-10.0f\n",
-                    nama, d.getQty(), d.getBarang().getHargaJual(), d.getSubtotal()
-            ));
+                sb.append(String.format("%-20s %-3d %,10.0f %,12.0f\n",
+                        nama, d.getQty(), d.getBarang().getHargaJual(), d.getSubtotal()
+                ));
+                totalKotor += d.getSubtotal(); // Sekalian hitung di sini
+            }
         }
 
         sb.append("-------------------------------------------------\n");
-        sb.append(String.format("TOTAL BAYAR     : Rp %,10.0f\n", p.getTotalBayar()));
+
+        // --- LOGIKA DISKON ---
+        double nominalDiskon = p.getDiskon(); 
+        if (nominalDiskon > 0) {
+            double persenDiskon = (totalKotor > 0) ? (nominalDiskon / totalKotor) * 100 : 0;
+            sb.append(String.format("Total Kotor     : Rp %,15.0f\n", totalKotor));
+            // Gunakan %.0f agar persen tidak ada koma nol (misal 10%)
+            sb.append(String.format("Diskon (%.0f%%)    : Rp %,15.0f\n", persenDiskon, nominalDiskon));
+            sb.append("-------------------------------------------------\n");
+        }
+
+        // --- TOTAL BAYAR ---
+        sb.append(String.format("TOTAL BAYAR     : Rp %,15.0f\n", p.getTotalBayar()));
         sb.append("-------------------------------------------------\n\n");
-        sb.append(centerText("      Terima Kasih Atas Kunjungan Anda!     ",lebarNota)).append("\n");
-        sb.append(centerText("--Closed Bill--", lebarNota)).append("\n");
+        
+        // --- FOOTER ---
+        sb.append(centerText("Terima Kasih Atas Kunjungan Anda!", lebarNota)).append("\n");
+        sb.append(centerText("-- Closed Bill --", lebarNota)).append("\n");
         
         txtPreview.setText(sb.toString());
     }
     
 
     private void saveToPDF() {
-        // TODO Auto-generated method stub
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Pilih Tempat Simpan Nota");
-        chooser.setSelectedFile(new java.io.File("Nota - " + p.getNoNota() + "+.pdf"));
+        // PERBAIKAN: Hilangkan tanda '+' yang tidak perlu di nama file
+        chooser.setSelectedFile(new java.io.File("Nota_" + p.getNoNota() + ".pdf"));
 
         if(chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            String Path = chooser.getSelectedFile().getAbsolutePath();
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            Document document = new Document();
             try {
-                Document document = new Document();
-                PdfWriter.getInstance(document, new FileOutputStream(Path));
+                PdfWriter.getInstance(document, new FileOutputStream(path));
                 document.open();
 
-                com.itextpdf.text.Font font = FontFactory.getFont(FontFactory.COURIER, 12);
+                com.itextpdf.text.Font font = FontFactory.getFont(FontFactory.COURIER, 10);
 
-                // Masukkan teks per baris agar spasi terjaga
-                String[] lines = txtPreview.getText().split("/n");
+                String[] lines = txtPreview.getText().split("\n");
                 for(String line : lines) {
-                    document.add(new Paragraph(line, font));
+                    Paragraph pPara = new Paragraph(line, font);
+                    pPara.setSpacingAfter(0);
+                    pPara.setSpacingBefore(0);
+                    document.add(pPara);
                 }
 
                 document.close();
-                JOptionPane.showMessageDialog(this, "Nota Berhasil Disimpan ke PDF\nLokasi:" + Path);
+                JOptionPane.showMessageDialog(this, "Nota Berhasil Disimpan ke PDF\nLokasi: " + path);
                 this.dispose();
-            } catch(Exception e ) {
-                JOptionPane.showMessageDialog(this, "Eror Saat Membuat PDF" + e.getMessage());
+            } catch(Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error Saat Membuat PDF: " + e.getMessage());
             }
         }
     }
@@ -137,39 +167,48 @@ public class CetakNota extends JDialog {
             // 1. Siapkan Customer
             model.Customer cust = new model.Customer(1, "Budi Santoso", "0812345", "Pontianak");
 
-            // 2. Siapkan List untuk menampung barang-barang belanjaan
+            // 2. Siapkan List Belanjaan (Harganya Harga Normal)
             java.util.List<model.DetailPenjualan> listBelanja = new java.util.ArrayList<>();
 
-            // --- TAMBAH BARANG 1 ---
+            // BARANG 1
             model.Barang b1 = new model.Barang();
             b1.setIdBarang("B001");
             b1.setNamaBarang("Raket Yonex Nano");
-            b1.setHargaJual(50000000);
-            b1.setDiskon(10); // Diskon 10%
-
-            model.DetailPenjualan d1 = new model.DetailPenjualan(1, 0, b1, 2); // Beli 2
+            b1.setHargaJual(500000); // Harga Asli
+            
+            // DetailPenjualan: ID, ID_Penjualan, ObjekBarang, Qty, Subtotal
+            model.DetailPenjualan d1 = new model.DetailPenjualan(1, 0, b1, 2, 1000000);
             listBelanja.add(d1);
 
-            // --- TAMBAH BARANG 2 ---
+            // BARANG 2
             model.Barang b2 = new model.Barang();
             b2.setIdBarang("B002");
             b2.setNamaBarang("Bola Kasti");
-            b2.setHargaJual(2500000);
-            b2.setDiskon(0); // Gak diskon
-
-            model.DetailPenjualan d2 = new model.DetailPenjualan(2, 0, b2, 5); // Beli 5
+            b2.setHargaJual(20000); // Harga Asli
+            
+            model.DetailPenjualan d2 = new model.DetailPenjualan(2, 0, b2, 5, 1000000);
             listBelanja.add(d2);
 
             // 3. Siapkan Header Penjualan
             model.Penjualan p = new model.Penjualan();
-            p.setNoNota("NOTA-2023-001");
+            p.setNoNota("NOTA-TEST-001");
             p.setTanggal(new java.sql.Date(System.currentTimeMillis()));
             p.setCustomer(cust);
             p.setNamaKasir("Admin Amatir");
-            p.setListDetail(listBelanja); // Masukkan list belanja tadi
+            p.setListDetail(listBelanja);
             
-            // PENTING: Hitung total bayarnya
-            p.hitungTotalBayar();
+            // --- LOGIKA DISKON NOTA DI SINI ---
+            int persenDiskon = 10; // Contoh diskon 10%
+            double totalKotor = 1100000; // (2*500rb + 5*20rb)
+            
+            // Hitung nominal diskonnya
+            double nominalDiskon = (double) persenDiskon / 100 * totalKotor;
+            
+            // Set ke objek penjualan (Sesuai model lo yang 'int')
+            p.setDiskon((int) nominalDiskon); 
+            
+            // Set Total Bayar (Total Kotor - Nominal Diskon)
+            p.setTotalBayar(totalKotor - nominalDiskon);
 
             // 4. Tampilkan Dialog
             new CetakNota(null, true, p, listBelanja).setVisible(true);

@@ -74,8 +74,68 @@ public class CustomerDAO {
         return cust;
     }
 
-    // 2. Method untuk simpan customer baru & ambil ID-nya (Biar gak error insertAndGetId)
-    public int insertAndGetId(model.Customer c) {
+    //Mehtod membuat kode customer
+    public String generateKodeBaru() {
+        String kode = "CUS001"; // Default
+        String sql = "SELECT kode_customer FROM customer ORDER BY id_customer DESC LIMIT 1";
+        
+        try (Connection conn = KoneksiDatabase.getConnection(); // Gue sederhanain panggilannya
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                String kodeLama = rs.getString("kode_customer"); 
+                // Pastikan kodeLama minimal ada 4 karakter (CUS + 1 angka)
+                if (kodeLama != null && kodeLama.length() >= 4) {
+                    try {
+                        // Ambil angka dari index ke-3 sampai habis
+                        int angka = Integer.parseInt(kodeLama.substring(3)) + 1;
+                        kode = String.format("CUS%03d", angka); 
+                    } catch (NumberFormatException e) {
+                        // Kalau ternyata kodenya aneh (bukan angka), balik ke default
+                        kode = "CUS001";
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error Generate Kode: " + e.getMessage());
+        }
+        return kode;
+    }
+
+    //Method untuk update/edit 
+    public void update(Customer c) {
+        String sql = "UPDATE customer SET nama_customer=?, no_telp=? WHERE id_customer=?";
+        try (Connection conn = config.KoneksiDatabase.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, c.getNamaCustomer());
+            ps.setString(2, c.getNoTelp());
+            ps.setInt(3, c.getIdCustomer());
+            
+            ps.executeUpdate();
+            System.out.println("Update Berhasil!");
+        } catch (SQLException e) {
+            System.out.println("Update Gagal: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    //Method untuk delete 
+    public void delete(int id) {
+        String sql = "DELETE FROM customer WHERE id_customer=?";
+        try (Connection conn = KoneksiDatabase.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            System.out.println("Data Berhasil Dihapus!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 2. Method untuk simpan customer baru & ambil ID-nya
+    public int insertAndGetId(Customer c) {
     String sql = "INSERT INTO customer (kode_customer, nama_customer, no_telp) VALUES (?, ?, ?)";
         try (Connection conn = config.KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
@@ -96,7 +156,6 @@ public class CustomerDAO {
                 System.out.println("Gagal: Database tidak memberikan ID baru.");
             }
         } catch (Exception e) {
-            // INI PENTING: Biar errornya muncul di layar, bukan cuma di terminal
             javax.swing.JOptionPane.showMessageDialog(null, "Error di CustomerDAO: " + e.getMessage());
             e.printStackTrace();
         }

@@ -10,6 +10,7 @@ public class Penjualan {
     private Customer customer;
     private String namaKasir;
     private String metodePembayaran;
+    private int diskon;
     
     private double totalBayar;
     private List<DetailPenjualan> listDetail;
@@ -17,7 +18,7 @@ public class Penjualan {
     public Penjualan() { }
     // konstruktor
     public Penjualan(int idPenjualan, String noNota, Date tanggal, Customer customer, String namaKasir, 
-    String metodePembayaran, List<DetailPenjualan> listDetail) 
+    String metodePembayaran, int diskon ,List<DetailPenjualan> listDetail) 
     {
         this.idPenjualan = idPenjualan;
         this.noNota = noNota;
@@ -25,6 +26,7 @@ public class Penjualan {
         this.customer = customer;
         this.namaKasir = namaKasir;
         this.metodePembayaran = metodePembayaran;
+        this.diskon = diskon;
         this.listDetail = listDetail;
     }
 
@@ -51,6 +53,10 @@ public class Penjualan {
 
     public String getMetodePembayaran() {
         return metodePembayaran;
+    }
+
+    public int getDiskon() {
+        return diskon;
     }
 
     public double getTotalBayar() {
@@ -86,6 +92,10 @@ public class Penjualan {
         this.metodePembayaran = metodePembayaran;
     }
 
+    public void setDiskon(int diskonInput) {
+        this.diskon = diskonInput;
+    }
+
     public void setTotalBayar(double totalBayar) {
         this.totalBayar = totalBayar;
     }
@@ -96,12 +106,13 @@ public class Penjualan {
 
     // Method
     public void hitungTotalBayar() {
-        double total = 0;
+        double tempTotal = 0; // pakai nama beda biar gak bingung sama atribut class
         if(listDetail != null) {
             for (DetailPenjualan dp : listDetail) {
-                total += dp.getSubtotal();
+                tempTotal += dp.getSubtotal();
             }
         }
-        this.totalBayar = total;
+        // Set totalBayar = jumlah subtotal - diskon
+        this.totalBayar = tempTotal - this.diskon;
     }
 }
