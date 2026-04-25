@@ -1,13 +1,15 @@
 package ui;
 
 import dao.CustomerDAO;
-import model.Customer;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import model.Customer;
+import model.UserSession;
 
-public class FormCustomer extends JFrame {
+public class FormCustomer extends JPanel {
+
     private JTextField txtNama, txtNoTelp, txtKodeCustomer;
     private JTable tabelCustomer;
     private DefaultTableModel modelTabel;
@@ -15,83 +17,80 @@ public class FormCustomer extends JFrame {
     private JButton btnEdit, btnSimpan, btnRefresh, btnHapus;
 
     public FormCustomer() {
-        setTitle("Data Pelanggan - Toko Olahraga");
-        setSize(700, 500);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new BorderLayout(10, 10));
 
-        // --- Panel Input ---
-        JPanel panelInput = new JPanel(new GridLayout(3, 2, 5, 5));
+        setLayout(new BorderLayout(15,15));
+        setBackground(new Color(245,247,250));
+        setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+
+        // ================= TITLE =================
+        JLabel title = new JLabel("DATA CUSTOMER");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        title.setForeground(new Color(44,62,80));
+
+        // ================= PANEL INPUT =================
+        JPanel panelInput = new JPanel(new GridLayout(3,2,10,10));
+        panelInput.setBackground(Color.WHITE);
         panelInput.setBorder(BorderFactory.createTitledBorder("Input Customer"));
-        
-        panelInput.add(new JLabel("Kode Customer:"));
-        txtKodeCustomer = new JTextField(); // Inisialisasi variabel yang benar
-        txtKodeCustomer.setEditable(false); // Jangan biarkan user edit manual
-        txtKodeCustomer.setBackground(new Color(235, 235, 235)); // Kasih warna abu biar kelihatan auto
-        panelInput.add(txtKodeCustomer);
 
-        panelInput.add(new JLabel("Nama Pelanggan:"));
+        txtKodeCustomer = new JTextField();
+        txtKodeCustomer.setEditable(false);
+        txtKodeCustomer.setBackground(new Color(235,235,235));
+
         txtNama = new JTextField();
-        panelInput.add(txtNama);
-
-        panelInput.add(new JLabel("No. Telepon:"));
         txtNoTelp = new JTextField();
+
+        panelInput.add(new JLabel("Kode Customer:"));
+        panelInput.add(txtKodeCustomer);
+        panelInput.add(new JLabel("Nama Pelanggan:"));
+        panelInput.add(txtNama);
+        panelInput.add(new JLabel("No. Telepon:"));
         panelInput.add(txtNoTelp);
 
-        add(panelInput, BorderLayout.NORTH);
-
-        // --- Tabel ---
+        // ================= TABEL =================
         String[] kolom = {"ID", "Kode", "Nama", "No. Telp"};
         modelTabel = new DefaultTableModel(kolom, 0);
         tabelCustomer = new JTable(modelTabel);
-        add(new JScrollPane(tabelCustomer), BorderLayout.CENTER);
 
-        // --- Tombol ---
-        JPanel panelTombol = new JPanel();
+        JScrollPane scroll = new JScrollPane(tabelCustomer);
+
+        // ================= BUTTON =================
+        JPanel panelTombol = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        panelTombol.setBackground(new Color(245,247,250));
+
         btnSimpan = new JButton("SIMPAN");
         btnRefresh = new JButton("REFRESH");
-        btnEdit = new JButton("Edit");
-        btnHapus = new JButton("Hapus");
+        btnEdit = new JButton("UPDATE");
+        btnHapus = new JButton("HAPUS");
+
         panelTombol.add(btnSimpan);
         panelTombol.add(btnRefresh);
         panelTombol.add(btnEdit);
         panelTombol.add(btnHapus);
 
-        // --- LOGIKA ROLE ---
-        String roleSekarang = model.UserSession.getRole();
-        System.out.println("DEBUG: Role di FormCustomer adalah: " + roleSekarang);
+        // ================= ROLE =================
+        String roleSekarang = UserSession.getRole();
 
-        if ("Kasir".equalsIgnoreCase(roleSekarang)) {
+        if ("kasir".equalsIgnoreCase(roleSekarang)) {
             btnEdit.setVisible(false);
             btnHapus.setVisible(false);
-        } else {
-            btnEdit.setVisible(true);
-            btnHapus.setVisible(true);
         }
 
-        JPanel panelKiri = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnBack = new JButton("KEMBALI");
-        btnBack.setBackground(Color.DARK_GRAY);
-        btnBack.setForeground(Color.WHITE);
-        btnBack.addActionListener(e -> this.dispose());
-        panelKiri.add(btnBack);
+        // ================= WRAPPER =================
+        JPanel atas = new JPanel(new BorderLayout(10,10));
+        atas.setOpaque(false);
+        atas.add(title, BorderLayout.NORTH);
+        atas.add(panelInput, BorderLayout.CENTER);
 
-        JPanel panelBawahFinal = new JPanel(new BorderLayout());
-        panelBawahFinal.add(panelKiri, BorderLayout.WEST);   // Back di pojok kiri
-        panelBawahFinal.add(panelTombol, BorderLayout.CENTER); // CRUD di tengah
-        
-        // 4. TERAKHIR: Masukkan satu panel utama ini ke SOUTH
-        add(panelBawahFinal, BorderLayout.SOUTH);
+        add(atas, BorderLayout.NORTH);
+        add(scroll, BorderLayout.CENTER);
+        add(panelTombol, BorderLayout.SOUTH);
 
-
-
-        // --- Event Handling ---
+        // ================= EVENT =================
         loadData();
         setKodeOtomatis();
 
         tabelCustomer.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) { // Tambahkan pengecekan ini
+            if (!e.getValueIsAdjusting()) {
                 int baris = tabelCustomer.getSelectedRow();
                 if (baris != -1) {
                     txtKodeCustomer.setText(modelTabel.getValueAt(baris, 1).toString());
@@ -103,91 +102,90 @@ public class FormCustomer extends JFrame {
 
         btnRefresh.addActionListener(e -> {
             loadData();
-            txtNama.setText("");
-            txtNoTelp.setText("");
-            setKodeOtomatis(); // <--- Biar kodenya update kalau ada data baru masuk
+            clearFields();
+            setKodeOtomatis();
         });
 
         btnSimpan.addActionListener(e -> {
-            model.Customer c = new model.Customer();
-            c.setKodeCustomer(txtKodeCustomer.getText()); // Ambil CUS00x dari field
+            Customer c = new Customer();
+            c.setKodeCustomer(txtKodeCustomer.getText());
             c.setNamaCustomer(txtNama.getText());
             c.setNoTelp(txtNoTelp.getText());
-            
-            cDAO.insert(c); // Simpan ke DB
-            
+
+            cDAO.insert(c);
+
             JOptionPane.showMessageDialog(this, "Customer Berhasil Ditambah!");
             loadData();
-            setKodeOtomatis(); // Reset kode ke urutan selanjutnya (CUS00x+1)
+            clearFields();
+            setKodeOtomatis();
         });
 
         btnEdit.addActionListener(e -> {
             int baris = tabelCustomer.getSelectedRow();
             if (baris == -1) {
-                JOptionPane.showMessageDialog(this, "Pilih dulu data di tabel yang mau diedit!");
+                JOptionPane.showMessageDialog(this, "Pilih data dulu!");
                 return;
             }
 
-            // Ambil data BARU dari TextField
             int id = Integer.parseInt(modelTabel.getValueAt(baris, 0).toString());
-            String namaBaru = txtNama.getText();
-            String telpBaru = txtNoTelp.getText();
 
-            model.Customer c = new model.Customer();
+            Customer c = new Customer();
             c.setIdCustomer(id);
-            c.setNamaCustomer(namaBaru);
-            c.setNoTelp(telpBaru);
+            c.setNamaCustomer(txtNama.getText());
+            c.setNoTelp(txtNoTelp.getText());
 
-            tabelCustomer.clearSelection(); 
-            cDAO.update(c); 
+            cDAO.update(c);
 
-            JOptionPane.showMessageDialog(this, "Data " + namaBaru + " berhasil diperbarui!");
-
-            loadData(); 
-            
-            // Reset field
-            txtNama.setText("");
-            txtNoTelp.setText("");
-            setKodeOtomatis(); 
+            JOptionPane.showMessageDialog(this, "Data berhasil diupdate!");
+            loadData();
+            clearFields();
+            setKodeOtomatis();
         });
 
         btnHapus.addActionListener(e -> {
             int baris = tabelCustomer.getSelectedRow();
             if (baris == -1) {
-                JOptionPane.showMessageDialog(this, "Pilih data yang mau dihapus!");
+                JOptionPane.showMessageDialog(this, "Pilih data dulu!");
                 return;
             }
-            
+
             int id = Integer.parseInt(modelTabel.getValueAt(baris, 0).toString());
-            int confirm = JOptionPane.showConfirmDialog(this, "Yakin mau hapus data ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
-            
+
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Yakin mau hapus?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+
             if (confirm == JOptionPane.YES_OPTION) {
                 cDAO.delete(id);
-                JOptionPane.showMessageDialog(this, "Data Berhasil Dihapus!");
+                JOptionPane.showMessageDialog(this, "Data berhasil dihapus!");
                 loadData();
+                clearFields();
                 setKodeOtomatis();
             }
         });
     }
 
-    
-
     private void setKodeOtomatis() {
         String kodeBaru = cDAO.generateKodeBaru();
-        txtKodeCustomer.setText(kodeBaru); // Pastikan nama variabelnya txtKodeCustomer
-        txtKodeCustomer.setEditable(false); // Biar nggak bisa dihapus user
+        txtKodeCustomer.setText(kodeBaru);
     }
-
 
     private void loadData() {
         modelTabel.setRowCount(0);
         List<Customer> list = cDAO.getAll();
+
         for (Customer c : list) {
-            modelTabel.addRow(new Object[]{c.getIdCustomer(), c.getKodeCustomer(), c.getNamaCustomer(), c.getNoTelp()});
+            modelTabel.addRow(new Object[]{
+                    c.getIdCustomer(),
+                    c.getKodeCustomer(),
+                    c.getNamaCustomer(),
+                    c.getNoTelp()
+            });
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new FormCustomer().setVisible(true));
+    private void clearFields() {
+        txtNama.setText("");
+        txtNoTelp.setText("");
+        tabelCustomer.clearSelection();
     }
 }

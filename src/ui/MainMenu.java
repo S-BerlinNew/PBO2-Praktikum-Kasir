@@ -7,6 +7,7 @@ import model.Akun;
 public class MainMenu extends JFrame {
     private Akun userLogin;
     private JButton activeButton = null;
+    private JPanel content; // 🔥 panel utama untuk ganti isi
 
     public MainMenu(Akun akun) {
         this.userLogin = akun;
@@ -74,7 +75,6 @@ public class MainMenu extends JFrame {
         btnLogout.setBorderPainted(false);
         btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // hover logout
         btnLogout.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btnLogout.setBackground(new Color(192, 57, 43));
@@ -87,25 +87,40 @@ public class MainMenu extends JFrame {
 
         bottom.add(btnLogout, BorderLayout.CENTER);
 
-        // ================= NAVIGASI (INI YANG KEMARIN HILANG) =================
+        // ================= SIDEBAR GABUNG =================
+        sidebar.add(header, BorderLayout.NORTH);
+        sidebar.add(menu, BorderLayout.CENTER);
+        sidebar.add(bottom, BorderLayout.SOUTH);
+
+        add(sidebar, BorderLayout.WEST);
+
+        // ================= CONTENT =================
+        content = new JPanel(new BorderLayout());
+        content.setBackground(new Color(245, 247, 250));
+        add(content, BorderLayout.CENTER);
+
+        // 🔥 default halaman awal
+        setContent(createWelcomePanel());
+
+        // ================= NAVIGASI =================
         btnBarang.addActionListener(e -> {
             setActiveButton(btnBarang);
-            new FormBarang().setVisible(true);
+            setContent(new FormBarang()); // 🔥 HARUS JPanel
         });
 
         btnCustomer.addActionListener(e -> {
             setActiveButton(btnCustomer);
-            new FormCustomer().setVisible(true);
+            setContent(new FormCustomer());
         });
 
         btnPenjualan.addActionListener(e -> {
             setActiveButton(btnPenjualan);
-            new FormPenjualan(userLogin).setVisible(true);
+            setContent(new FormPenjualan(userLogin));
         });
 
         btnAkun.addActionListener(e -> {
             setActiveButton(btnAkun);
-            new FormKelolaAkun(this, true).setVisible(true);
+            setContent(new FormKelolaAkunPanel()); // 🔥 ubah jadi JPanel
         });
 
         btnLogout.addActionListener(e -> {
@@ -121,17 +136,27 @@ public class MainMenu extends JFrame {
             btnBarang.setEnabled(false);
             btnAkun.setVisible(false);
         }
+    }
 
-        sidebar.add(header, BorderLayout.NORTH);
-        sidebar.add(menu, BorderLayout.CENTER);
-        sidebar.add(bottom, BorderLayout.SOUTH);
+    // ================= GANTI CONTENT =================
+    private void setContent(JPanel panel) {
+        content.removeAll();
+        content.add(panel, BorderLayout.CENTER);
+        content.revalidate();
+        content.repaint();
+    }
 
-        add(sidebar, BorderLayout.WEST);
+    // ================= DEFAULT PANEL =================
+    private JPanel createWelcomePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(245, 247, 250));
 
-        // ================= CONTENT =================
-        JPanel content = new JPanel();
-        content.setBackground(new Color(245, 247, 250));
-        add(content, BorderLayout.CENTER);
+        JLabel label = new JLabel("Selamat Datang di Sistem Kasir", SwingConstants.CENTER);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        label.setForeground(new Color(44, 62, 80));
+
+        panel.add(label, BorderLayout.CENTER);
+        return panel;
     }
 
     // ================= BUTTON =================
@@ -148,7 +173,6 @@ public class MainMenu extends JFrame {
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 
-        // hover
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (btn != activeButton) {
@@ -166,7 +190,7 @@ public class MainMenu extends JFrame {
         return btn;
     }
 
-    // ================= ACTIVE =================
+    // ================= ACTIVE BUTTON =================
     private void setActiveButton(JButton btn) {
         if (activeButton != null) {
             activeButton.setBackground(new Color(36, 52, 71));
