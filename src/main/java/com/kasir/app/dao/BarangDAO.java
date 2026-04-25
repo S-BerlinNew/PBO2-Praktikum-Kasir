@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BarangDAO {
-    // Ambil semua data barang
+    // === AMBIL DATA BARANG ===
     public List<Barang> getAll() {
         List<Barang> listBarang = new ArrayList<>();
         String sql = "SELECT * FROM barang"; 
@@ -37,7 +37,7 @@ public class BarangDAO {
          return listBarang;
     }
 
-    // Fungsi khusus untuk Kasir (Cuma yang status 1)
+    // === FUNGSI ROLE KASIR 
     public List<Barang> getAllAktif() {
         List<Barang> listBarang = new ArrayList<>();
         String sql = "SELECT * FROM barang WHERE status = 1"; 
@@ -62,7 +62,7 @@ public class BarangDAO {
         return listBarang;
     }
 
-    // Pengambilan satu barang untu detail penjualan
+    // === PENGAMBILAN SATU BARANG UNTUK DETAIL PENJUALAN
     public Barang getById(String id) {
         Barang b = null;
 
@@ -94,7 +94,7 @@ public class BarangDAO {
             return b;
     } 
 
-    // Pengurangan Stok(qty) jika barang kejual
+    // === PENGURANGAN STOK JIKA KEJUAL ====
     public void kurangiStok(String id, int jumlah) {
         String sql = "UPDATE barang SET stok = stok - ? WHERE id_barang = ?";
         try (Connection conn = KoneksiDatabase.getConnection();
@@ -107,7 +107,7 @@ public class BarangDAO {
         }
     }
 
-    // Insert ke database
+    // === INSERT KE DB
     public void insert(Barang b) {
     String sql = "INSERT INTO barang (id_barang, nama_barang, harga_jual, harga_modal," + //
                 "                 jenis_barang, brand, warna, stok, diskon, status)" + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

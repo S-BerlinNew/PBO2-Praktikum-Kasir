@@ -14,8 +14,6 @@ import java.awt.event.MouseEvent;
 
 
 public class FormBarang extends JFrame{
-
-    // Komponen
     private JTextField txtId, txtNama, txtHargaJual, txtHargaModal, txtJenis, txtBrand, txtWarna, txtStok;
     private JTable tabelBarang;
     private DefaultTableModel modelTabel;
@@ -23,14 +21,14 @@ public class FormBarang extends JFrame{
     private int statusSementara = 1;
 
     public FormBarang() {
-        //Judul Jendela
+        // === JUDUL JENDELA ====
         setTitle("Kelola Data Barang - Toko Olahraga");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel Input 
+        // === PANEL INPUT DATA BARANG ==== 
         JPanel panelInput = new JPanel(new GridLayout(3, 6, 10, 10));
         panelInput.setBorder(BorderFactory.createTitledBorder("Input Data Barang"));
 
@@ -69,13 +67,13 @@ public class FormBarang extends JFrame{
         add(panelInput, BorderLayout.NORTH);
         
 
-        // Panel Tabel Tengah
+        // ==== PANEL TABEL TENGAH ====
         String[] kolom = {"ID", "Nama", "Harga Jual", "Harga Modal", "Jenis", "Brand", "Warna", "Stok", "Status"};
         modelTabel = new DefaultTableModel(kolom, 0);
         tabelBarang = new JTable(modelTabel);
         add(new JScrollPane(tabelBarang), BorderLayout.CENTER);
 
-        // Panel Tombol
+        // ==== PANEL TOMBOL ====
         JPanel panelTombol = new JPanel();
         JButton btnSimpan = new JButton("SIMPAN BARU");
         JButton btnEdit = new JButton("UPDATE DATA");

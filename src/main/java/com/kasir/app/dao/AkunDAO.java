@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public class AkunDAO {
-    // untuk login
+   // === BAGIAN LOGIN ===
     public Akun cekLogin(String user, String pass) {
         Akun akun = null;
         String sql = "SELECT * FROM akun WHERE username = ? AND PASSWORD = ?";
@@ -52,7 +52,7 @@ public class AkunDAO {
         return list;
     }
 
-    // untuk tambah akun baru
+    // === TAMBAH AKUN BARU ===
     public boolean insert(Akun a) {
         String sql = "INSERT INTO akun (username, password, nama_lengkap, role) VALUES (?, ?, ?, ?)";
         try (Connection conn = KoneksiDatabase.getConnection();
@@ -68,7 +68,7 @@ public class AkunDAO {
         }
     }
 
-    // Untuk ganti password dan username
+    // === GANTI PASSWORD ====
     public boolean update(Akun a) {
         // Query dinamis: kalau password kosong, jangan update password-nya
         boolean updatePass = a.getPassword() != null && !a.getPassword().isEmpty();
@@ -95,6 +95,8 @@ public class AkunDAO {
             return false; 
         }
     }
+
+    // === UNTUK HAPUS AKUN ====
     public boolean delete(int id) {
         String sql = "DELETE FROM akun WHERE id_akun = ?";
         try (Connection conn = KoneksiDatabase.getConnection();

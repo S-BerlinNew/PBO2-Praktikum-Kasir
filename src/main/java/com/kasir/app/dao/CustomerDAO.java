@@ -8,7 +8,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 public class CustomerDAO {
-    // Ambil semua data customer
+    // === AMBIL DATA CUSTOMER
     public List<Customer> getAll() {
         List<Customer> list = new ArrayList<>();
         String sql = "SELECT * FROM customer";
@@ -32,7 +32,7 @@ public class CustomerDAO {
             return list;
     }
 
-    // Insert ke database
+    // INSERT KE DB
     public void insert(Customer c) {
         String sql = "INSERT INTO customer (kode_customer, nama_customer, no_telp) VALUES (?, ?, ?)";
         try(Connection conn = KoneksiDatabase.getConnection();
@@ -50,7 +50,7 @@ public class CustomerDAO {
             }
     }
 
-    // 1. Method untuk cari customer berdasarkan nama (Biar gak error getByName)
+    // Method untuk cari customer berdasarkan nama (Biar gak error getByName)
     public Customer getByName(String nama) {
         Customer cust = null;
         String sql = "SELECT * FROM customer WHERE nama_customer = ?";
@@ -134,7 +134,7 @@ public class CustomerDAO {
         }
     }
 
-    // 2. Method untuk simpan customer baru & ambil ID-nya
+    // Method untuk simpan customer baru & ambil ID-nya
     public int insertAndGetId(Customer c) {
     String sql = "INSERT INTO customer (kode_customer, nama_customer, no_telp) VALUES (?, ?, ?)";
         try (Connection conn = KoneksiDatabase.getConnection();

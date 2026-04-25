@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PenjualanDAO {
-    // Ambil semua data penjualan
+    // AMBIL DATA PENJUALAN
     public List<Penjualan> getAll() {
         List<Penjualan> listPenjualan = new ArrayList<>();
         String sql = "SELECT * FROM penjualan";
@@ -38,7 +38,7 @@ public class PenjualanDAO {
             return listPenjualan;
     } 
 
-    // Insert ke Database
+    // === INSERT KE DB
     public int InsertAndGetId(Penjualan p) {
         String sql = "INSERT INTO penjualan (no_nota, tanggal, id_customer, nama_kasir, metode_pembayaran, diskon, total_bayar) VALUES (?, ?, ?, ?, ?, ?, ?)";
         int generatedId = 0;

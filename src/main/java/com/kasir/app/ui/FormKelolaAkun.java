@@ -57,7 +57,7 @@ public class FormKelolaAkun extends JDialog {
         cbRole = new JComboBox<>(new String[]{"admin", "kasir"});
         panelInput.add(cbRole);
 
-        // Tombol-tombol
+        // 
         JButton btnSimpan = new JButton("Simpan Baru");
         JButton btnUpdate = new JButton("Update (Ganti Pass)");
         JButton btnHapus = new JButton("Hapus Akun");
@@ -79,11 +79,11 @@ public class FormKelolaAkun extends JDialog {
         panelKiri.add(btnBack);
 
         JPanel panelBawahFinal = new JPanel(new BorderLayout());
-        panelBawahFinal.add(panelKiri, BorderLayout.WEST);   // Back di pojok kiri
-        panelBawahFinal.add(panelTombol, BorderLayout.CENTER); // CRUD di tengah
+        panelBawahFinal.add(panelKiri, BorderLayout.WEST);   
+        panelBawahFinal.add(panelTombol, BorderLayout.CENTER); 
         
-        // 4. TERAKHIR: Masukkan satu panel utama ini ke SOUTH
         add(panelBawahFinal, BorderLayout.SOUTH);
+
 
         // BAGIAN LOGIKA BUTTON
         btnSimpan.addActionListener(e -> tampilkanFormInput(null));
@@ -191,9 +191,6 @@ public class FormKelolaAkun extends JDialog {
             JOptionPane.showMessageDialog(this, "Pilih akun di tabel dulu!");
             return;
         }
-        
-        // 1. Ambil username dari tabel biar log-nya informatif
-        // Sesuaikan index kolom (1) dengan posisi username di tabel lo
         String usernameTarget = modelTabel.getValueAt(tabelAkun.getSelectedRow(), 1).toString();
 
         int konfirm = JOptionPane.showConfirmDialog(this, 
@@ -203,7 +200,6 @@ public class FormKelolaAkun extends JDialog {
         if(konfirm == JOptionPane.YES_OPTION) {
             if(aDAO.delete(idDipilih)) { 
                 
-                // 2. CATAT LOG: Taruh di sini setelah dipastikan berhasil hapus
                 KoneksiDatabase.addLog(UserSession.getIdAkun(), "MENGHAPUS AKUN: " + usernameTarget);
                 
                 JOptionPane.showMessageDialog(this, "Akun Berhasil Dihapus!");

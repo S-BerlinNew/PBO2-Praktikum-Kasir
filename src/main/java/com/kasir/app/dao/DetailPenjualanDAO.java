@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DetailPenjualanDAO {
-    // Ambil semua data detail penjualan
+    // === AMBIL SEMUA DATA DETAIL PENJUALAN
     public List<DetailPenjualan> getAll() {
         List<DetailPenjualan> listDetailPenjualan = new ArrayList<>();
         String sql = "SELECT * FROM detail_penjualan";
@@ -39,7 +39,7 @@ public class DetailPenjualanDAO {
             return listDetailPenjualan;
     }
 
-    // Insert ke database
+    // === INSERT KE DB ===
     public void insert(DetailPenjualan dp) {
         String sql = "INSERT INTO detail_penjualan (id_penjualan, id_barang, qty, subtotal) VALUES(?, ?, ?, ?)";
         try(Connection conn = KoneksiDatabase.getConnection(); 

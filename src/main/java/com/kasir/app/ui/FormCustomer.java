@@ -23,7 +23,7 @@ public class FormCustomer extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // --- Panel Input ---
+        // === PANEL INPUT DATA ====
         JPanel panelInput = new JPanel(new GridLayout(3, 2, 5, 5));
         panelInput.setBorder(BorderFactory.createTitledBorder("Input Customer"));
         
@@ -43,13 +43,13 @@ public class FormCustomer extends JFrame {
 
         add(panelInput, BorderLayout.NORTH);
 
-        // --- Tabel ---
+        // === TABEL DATA ====
         String[] kolom = {"ID", "Kode", "Nama", "No. Telp"};
         modelTabel = new DefaultTableModel(kolom, 0);
         tabelCustomer = new JTable(modelTabel);
         add(new JScrollPane(tabelCustomer), BorderLayout.CENTER);
 
-        // --- Tombol ---
+        // === BUTTON ===
         JPanel panelTombol = new JPanel();
         btnSimpan = new JButton("SIMPAN");
         btnRefresh = new JButton("REFRESH");
@@ -80,18 +80,18 @@ public class FormCustomer extends JFrame {
         panelKiri.add(btnBack);
 
         JPanel panelBawahFinal = new JPanel(new BorderLayout());
-        panelBawahFinal.add(panelKiri, BorderLayout.WEST);   // Back di pojok kiri
-        panelBawahFinal.add(panelTombol, BorderLayout.CENTER); // CRUD di tengah
+        panelBawahFinal.add(panelKiri, BorderLayout.WEST);  
+        panelBawahFinal.add(panelTombol, BorderLayout.CENTER); 
         
-        // 4. TERAKHIR: Masukkan satu panel utama ini ke SOUTH
+
         add(panelBawahFinal, BorderLayout.SOUTH);
 
 
 
-        // --- Event Handling ---
         loadData();
         setKodeOtomatis();
 
+        // === EVENTE LISTENER ====
         tabelCustomer.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) { // Tambahkan pengecekan ini
                 int baris = tabelCustomer.getSelectedRow();
@@ -107,7 +107,7 @@ public class FormCustomer extends JFrame {
             loadData();
             txtNama.setText("");
             txtNoTelp.setText("");
-            setKodeOtomatis(); // <--- Biar kodenya update kalau ada data baru masuk
+            setKodeOtomatis(); 
         });
 
         btnSimpan.addActionListener(e -> {
@@ -135,7 +135,6 @@ public class FormCustomer extends JFrame {
                 return;
             }
 
-            // Ambil data BARU dari TextField
             int id = Integer.parseInt(modelTabel.getValueAt(baris, 0).toString());
             String namaBaru = txtNama.getText();
             String telpBaru = txtNoTelp.getText();
@@ -153,7 +152,6 @@ public class FormCustomer extends JFrame {
 
             loadData(); 
             
-            // Reset field
             txtNama.setText("");
             txtNoTelp.setText("");
             setKodeOtomatis(); 
@@ -167,7 +165,7 @@ public class FormCustomer extends JFrame {
             }
             
             int id = Integer.parseInt(modelTabel.getValueAt(baris, 0).toString());
-            String namaHapus = modelTabel.getValueAt(baris, 2).toString(); // Ambil nama dari kolom ke-3 (index 2)
+            String namaHapus = modelTabel.getValueAt(baris, 2).toString(); 
             
             int confirm = JOptionPane.showConfirmDialog(this, "Yakin mau hapus " + namaHapus + "?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
             

@@ -19,12 +19,11 @@ public class LoginForm extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10,10));
 
-        // Judul
         JLabel lblTitle = new JLabel("LOGIN", SwingConstants.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
         add(lblTitle, BorderLayout.NORTH);
 
-        // Panel input
+        // === PANEL INPUT ===
         JPanel panelInput = new JPanel(new GridLayout(2,2,5,5));
         panelInput.setBorder(BorderFactory.createEmptyBorder(10,30,10,20));
 
@@ -66,7 +65,7 @@ public class LoginForm extends JFrame {
             UserSession.setIdAkun(akun.getIdAkun()); 
             UserSession.setRole(akun.getRole());
             UserSession.setUsername(akun.getUsername());
-            
+
             new MainMenu(akun).setVisible(true); 
 
             this.dispose(); // Tutup form login

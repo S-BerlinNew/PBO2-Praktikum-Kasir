@@ -37,7 +37,6 @@ public class Akun {
         return role;
     }
 
-    // setter
     public void setIdAkun(int id_akun) {
         this.id_akun = id_akun;
     }
