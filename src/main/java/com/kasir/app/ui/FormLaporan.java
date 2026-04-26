@@ -29,6 +29,17 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
 import com.kasir.app.config.KoneksiDatabase;
+import java.awt.*;
+import java.awt.event.*;
+import java.sql.*;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.kernel.geom.PageSize;
+import java.io.File;
 
 public class FormLaporan extends JFrame {
     private JTable tabelMaster, tabelLog;
@@ -75,6 +86,11 @@ public class FormLaporan extends JFrame {
         spinTglAkhir.setEditor(new JSpinner.DateEditor(spinTglAkhir, "yyyy-MM-dd"));
         JButton btnFilterTgl = new JButton("Filter Tanggal");
         JButton btnReset = new JButton("Reset");
+        JButton btnCetak = new JButton("CETAK PDF");
+        btnCetak.setBackground(new Color(0, 153, 51)); 
+        btnCetak.setForeground(Color.WHITE);
+        btnCetak.addActionListener(e -> cetakKePDF()); 
+        panelFilterMaster.add(btnCetak);
 
         panelFilterMaster.add(new JLabel("No Nota:"));
         panelFilterMaster.add(txtCari);
@@ -240,6 +256,77 @@ public class FormLaporan extends JFrame {
             }
         } catch (SQLException e) { System.out.println("Log belum siap."); 
             e.printStackTrace();
+        }
+    }
+
+    private void cetakKePDF() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Simpan Laporan Sebagai PDF");
+        
+        String defaultName = "Laporan_Penjualan_" + new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date()) + ".pdf";
+        chooser.setSelectedFile(new java.io.File(defaultName));
+
+        int userSelection = chooser.showSaveDialog(this);
+
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy");
+        String tglAwal = sdf.format(spinTglAwal.getValue());
+        String tglAkhir = sdf.format(spinTglAkhir.getValue());
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = chooser.getSelectedFile();
+            String path = fileToSave.getAbsolutePath();
+
+            if (!path.toLowerCase().endsWith(".pdf")) {
+                path += ".pdf";
+            }
+
+            try {
+                com.itextpdf.kernel.pdf.PdfWriter writer = new com.itextpdf.kernel.pdf.PdfWriter(path);
+                com.itextpdf.kernel.pdf.PdfDocument pdf = new com.itextpdf.kernel.pdf.PdfDocument(writer);
+                pdf.setDefaultPageSize(com.itextpdf.kernel.geom.PageSize.A4.rotate());
+                com.itextpdf.layout.Document document = new com.itextpdf.layout.Document(pdf);
+
+                // HEADER
+                document.add(new com.itextpdf.layout.element.Paragraph("TOKO OLAHRAGA AMATIR").setBold().setFontSize(20));
+                document.add(new com.itextpdf.layout.element.Paragraph("Jl. Purnama 2, Kota Pontianak").setFontSize(20));
+                document.add(new com.itextpdf.layout.element.Paragraph("LAPORAN RIWAYAT TRANSAKSI PENJUALAN")
+                        .setBold().setFontSize(16));
+                document.add(new com.itextpdf.layout.element.Paragraph("Periode : " + tglAwal + "-" + tglAkhir).setFontSize(15));
+                document.add(new com.itextpdf.layout.element.Paragraph("Lokasi File: " + path).setFontSize(9));
+                document.add(new com.itextpdf.layout.element.Paragraph("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"));
+
+                // TABEL 
+                float[] columnWidths = {2, 2, 2, 2, 3, 1, 2, 1, 2, 2, 2, 2}; 
+                com.itextpdf.layout.element.Table table = new com.itextpdf.layout.element.Table(com.itextpdf.layout.properties.UnitValue.createPercentArray(columnWidths));
+                table.setWidth(com.itextpdf.layout.properties.UnitValue.createPercentValue(100));
+
+                // Header Tabel
+                String[] headers = {"Nota", "Tanggal", "Kasir", "ID", "Barang", "Qty", "Harga", "Disc", "Subtotal", "Metode", "Modal", "Untung"};
+                for (String h : headers) {
+                    table.addHeaderCell(new com.itextpdf.layout.element.Paragraph(h).setBold().setFontSize(9));
+                }
+
+                // ISI DATA DARI JTABLE
+                for (int i = 0; i < tabelMaster.getRowCount(); i++) {
+                    for (int j = 0; j < tabelMaster.getColumnCount(); j++) {
+                        Object val = tabelMaster.getValueAt(i, j);
+                        table.addCell(new com.itextpdf.layout.element.Paragraph(val != null ? val.toString() : "").setFontSize(8));
+                    }
+                }
+
+                document.add(table);
+                document.close();
+
+                JOptionPane.showMessageDialog(this, "Laporan berhasil disimpan ke:\n" + path);
+
+                if (java.awt.Desktop.isDesktopSupported()) {
+                    java.awt.Desktop.getDesktop().open(new java.io.File(path));
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Gagal menyimpan PDF: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }
