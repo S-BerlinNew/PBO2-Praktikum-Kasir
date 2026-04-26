@@ -144,7 +144,7 @@ public class MainMenu extends JFrame {
 
         // ROLE
         if (userLogin.getRole().equalsIgnoreCase("kasir")) {
-            btnBarang.setEnabled(false);
+            btnBarang.setVisible(false);
             btnAkun.setVisible(false);
             btnLaporan.setVisible(false);
         }
