@@ -1,13 +1,27 @@
 package com.kasir.app.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+
+import com.kasir.app.config.KoneksiDatabase;
 import com.kasir.app.dao.CustomerDAO;
 import com.kasir.app.model.Customer;
 import com.kasir.app.model.UserSession;
-import com.kasir.app.config.*;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.util.List;
 
 public class FormCustomer extends JFrame {
     private JTextField txtNama, txtNoTelp, txtKodeCustomer;

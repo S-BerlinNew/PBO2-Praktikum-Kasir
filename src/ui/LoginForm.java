@@ -1,12 +1,10 @@
-package com.kasir.app.ui;
+package ui;
 
-import com.kasir.app.dao.AkunDAO;
-import com.kasir.app.model.Akun;
-import com.kasir.app.model.UserSession;
-
-
-import javax.swing.*;
+import dao.AkunDAO;
 import java.awt.*;
+import javax.swing.*;
+import model.Akun;
+import model.UserSession;
 
 public class LoginForm extends JFrame {
 
@@ -46,16 +44,16 @@ public class LoginForm extends JFrame {
         txtPassword = new JPasswordField();
         stylePasswordField(txtPassword, "Password");
 
-        // SHOW PASSWORD
+        // 🔥 SHOW PASSWORD
         showPassword = new JCheckBox("Tampilkan Password");
         showPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
         showPassword.setBackground(Color.WHITE);
 
         showPassword.addActionListener(e -> {
             if (showPassword.isSelected()) {
-                txtPassword.setEchoChar((char) 0);
+                txtPassword.setEchoChar((char) 0); // tampilkan
             } else {
-                txtPassword.setEchoChar('•');
+                txtPassword.setEchoChar('•'); // sembunyikan
             }
         });
 
@@ -85,18 +83,19 @@ public class LoginForm extends JFrame {
         add(wrapper, BorderLayout.CENTER);
     }
 
-    // ================= STYLE TEXTFIELD =================
+    // ================= STYLE USERNAME =================
     private void styleTextField(JTextField field, String hint) {
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200,200,200)),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+
         field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         field.setBackground(Color.WHITE);
         field.setForeground(Color.GRAY);
         field.setText(hint);
-
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
 
         field.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -120,16 +119,17 @@ public class LoginForm extends JFrame {
     // ================= STYLE PASSWORD =================
     private void stylePasswordField(JPasswordField field, String hint) {
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200,200,200)),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+
         field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         field.setBackground(Color.WHITE);
         field.setForeground(Color.GRAY);
         field.setText(hint);
-        field.setEchoChar((char) 0);
-
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
+        field.setEchoChar((char) 0); // biar hint kelihatan
 
         field.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -152,15 +152,10 @@ public class LoginForm extends JFrame {
         });
     }
 
-    // ================= LOGIN =================
+    // ================= LOGIN PROCESS =================
     private void prosesLogin() {
         String username = txtUsername.getText();
         String password = new String(txtPassword.getPassword());
-
-        if (username.equals("Username") || password.equals("Password")) {
-            JOptionPane.showMessageDialog(this, "Isi Username dan Password dulu!");
-            return;
-        }
 
         AkunDAO aDAO = new AkunDAO();
         Akun akun = aDAO.cekLogin(username, password);
@@ -169,9 +164,7 @@ public class LoginForm extends JFrame {
             JOptionPane.showMessageDialog(this,
                     "Login Berhasil!\nSelamat Datang, " + akun.getNamaLengkap());
 
-            UserSession.setIdAkun(akun.getIdAkun());
             UserSession.setRole(akun.getRole());
-            UserSession.setUsername(akun.getUsername());
 
             new MainMenu(akun).setVisible(true);
             this.dispose();
@@ -183,11 +176,11 @@ public class LoginForm extends JFrame {
         }
     }
 
-    // ================= BUTTON MODERN =================
+    // ================= CUSTOM BUTTON =================
     class ModernButton extends JButton {
         private Color baseColor;
         private Color hoverColor;
-        private boolean ishover = false;
+        private boolean isHover = false;
 
         public ModernButton(String text, Color base, Color hover) {
             super(text);
@@ -203,12 +196,12 @@ public class LoginForm extends JFrame {
 
             addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseEntered(java.awt.event.MouseEvent e) {
-                    ishover = true;
+                    isHover = true;
                     repaint();
                 }
 
                 public void mouseExited(java.awt.event.MouseEvent e) {
-                    ishover = false;
+                    isHover = false;
                     repaint();
                 }
             });
@@ -218,13 +211,14 @@ public class LoginForm extends JFrame {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            Color warna = ishover ? hoverColor : baseColor;
+            Color warna = isHover ? hoverColor : baseColor;
 
-            g2.setPaint(new GradientPaint(
+            GradientPaint gp = new GradientPaint(
                     0, 0, warna.brighter(),
                     0, getHeight(), warna.darker()
-            ));
+            );
 
+            g2.setPaint(gp);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
 
             g2.dispose();
