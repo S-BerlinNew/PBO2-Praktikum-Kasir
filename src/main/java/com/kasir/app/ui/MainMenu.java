@@ -45,7 +45,7 @@ public class MainMenu extends JFrame {
 
         // LOGIKA HAK AKSES ROLE
         if(userLogin.getRole().equalsIgnoreCase("kasir")) {
-            btnBarang.setEnabled(false);
+            btnBarang.setVisible(false);
             btnAkun.setVisible(false);
             btnLaporan.setVisible(false);
             btnBarang.setToolTipText("Hanya Admin yang bisa mengelola barang");
