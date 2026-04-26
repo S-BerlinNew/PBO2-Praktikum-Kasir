@@ -110,7 +110,7 @@ public class BarangDAO {
     // === INSERT KE DB
     public void insert(Barang b) {
     String sql = "INSERT INTO barang (id_barang, nama_barang, harga_jual, harga_modal," + //
-                "                 jenis_barang, brand, warna, stok, diskon, status)" + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "                 jenis_barang, brand, warna, stok, status)" + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
             
@@ -122,8 +122,7 @@ public class BarangDAO {
             ps.setString(6, b.getBrand());
             ps.setString(7, b.getWarna());
             ps.setInt(8, b.getStok());
-            ps.setInt(9, 0);
-            ps.setInt(10, b.getStatus());
+            ps.setInt(9, b.getStatus());
             
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -135,7 +134,7 @@ public class BarangDAO {
     // UNTUK UPDATE DATA BARANG
     public void update(Barang b) {
         String sql = "UPDATE barang SET nama_barang=?, harga_jual=?, harga_modal=?," +
-                    "jenis_barang=?, brand=?, warna=?, stok=?, diskon=? WHERE id_barang=?";
+                    "jenis_barang=?, brand=?, warna=?, stok=? WHERE id_barang=?";
         
         try (Connection conn = KoneksiDatabase.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -146,8 +145,7 @@ public class BarangDAO {
             ps.setString(5, b.getBrand());
             ps.setString(6, b.getWarna());
             ps.setInt(7, b.getStok());
-            ps.setInt(8, 0);
-            ps.setString(9, b.getIdBarang());
+            ps.setString(8, b.getIdBarang());
 
             ps.executeUpdate();
         } catch (Exception e) {
