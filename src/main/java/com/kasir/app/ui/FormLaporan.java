@@ -23,6 +23,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JFileChooser;
 import javax.swing.RowFilter;
 import javax.swing.SpinnerDateModel;
 import javax.swing.table.DefaultTableModel;
@@ -32,14 +33,7 @@ import com.kasir.app.config.KoneksiDatabase;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.properties.UnitValue;
-import com.itextpdf.kernel.geom.PageSize;
-import java.io.File;
+import javax.swing.table.*;
 
 public class FormLaporan extends JFrame {
     private JTable tabelMaster, tabelLog;
@@ -293,7 +287,7 @@ public class FormLaporan extends JFrame {
                         .setBold().setFontSize(16));
                 document.add(new com.itextpdf.layout.element.Paragraph("Periode : " + tglAwal + "-" + tglAkhir).setFontSize(15));
                 document.add(new com.itextpdf.layout.element.Paragraph("Lokasi File: " + path).setFontSize(9));
-                document.add(new com.itextpdf.layout.element.Paragraph("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"));
+                document.add(new com.itextpdf.layout.element.Paragraph("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"));
 
                 // TABEL 
                 float[] columnWidths = {2, 2, 2, 2, 3, 1, 2, 1, 2, 2, 2, 2}; 
